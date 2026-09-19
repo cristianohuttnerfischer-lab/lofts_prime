@@ -64,7 +64,7 @@ label{display:block;font-size:12px;font-weight:800;margin:13px 0 6px}input,texta
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://yfdhqczmtqujumqeokt.supabase.co';
-const SUPABASE_KEY='sb_publishable_dZbP0NhugOAmNwnXHddFUA_wkdYN00_';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmZGhxemN6bXRxdWp1bXFlb2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NzY3MDcsImV4cCI6MjEwNTM1MjcwN30.wnce-Yt1KddCNiSev-SZHZxAXEpE50XyRm4CII0V-m8';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const AMENITIES=[
 ['wifi','📶 Wi‑Fi'],['air_conditioning','❄️ Ar-condicionado'],['tv','📺 TV'],['kitchen','🍳 Cozinha'],
@@ -94,9 +94,20 @@ async function login(){
   const emailValue=document.getElementById('email').value.trim();
   const passwordValue=document.getElementById('pass').value;
   if(!emailValue || !passwordValue) throw new Error('Informe e-mail e senha.');
-  const {data,error}=await sb.auth.signInWithPassword({email:emailValue,password:passwordValue});
-  if(error) throw error;
-  token=data.session?.access_token||null;
+  let r;
+  try {
+    r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email:emailValue,password:passwordValue})
+    });
+  } catch(e) {
+    throw new Error('Não foi possível conectar ao Supabase. Verifique a conexão com a internet.');
+  }
+  let data={};
+  try{data=await r.json()}catch{}
+  if(!r.ok) throw new Error(data.error_description||data.msg||data.message||('Supabase HTTP '+r.status));
+  token=data.access_token||null;
   if(!token) throw new Error('O Supabase não retornou a sessão.');
   sessionStorage.setItem('lp_admin_token',token);
   showApp();
@@ -149,10 +160,8 @@ photoFiles.addEventListener('change',()=>{});
 save.onclick=()=>save();
 function showApp(){login.style.display='none';app.style.display='block';logout.style.display='block';load().catch(e=>saveMsg.textContent='❌ '+e.message)}
 (async()=>{
-  try{
-    const {data}=await sb.auth.getSession();
-    if(data.session){ token=data.session.access_token; showApp(); }
-  }catch(e){ console.warn(e); }
+  const saved=sessionStorage.getItem('lp_admin_token');
+  if(saved){ token=saved; showApp(); }
 })();
 </script>
 </body></html>
