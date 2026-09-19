@@ -25,30 +25,15 @@ main{padding-bottom:80px}.hero{padding:25px 16px 14px;background:linear-gradient
 .lb{background:#000;align-items:center;justify-content:center}.lb.on{display:flex}.lb img{max-width:100%;max-height:84vh}.lb button{position:absolute;border:0;border-radius:50%;width:40px;height:40px}.x{right:14px;top:14px}.l{left:10px;top:50%;font-size:25px}.r{right:10px;top:50%;font-size:25px}.count{position:absolute;bottom:18px;background:#0009;color:#fff;padding:6px 10px;border-radius:16px;font-size:11px}
 </style>
 <style>
-/* Lofts Prime — reserva integrada */
-.lp-booking-box{margin-top:18px;padding:18px;border-radius:18px;background:#fff;box-shadow:0 5px 24px rgba(0,0,0,.08);border:1px solid #eee}
-.lp-booking-box h3{margin:0 0 12px}
-.lp-booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.lp-booking-box label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
-.lp-booking-box input{width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;background:#fff}
-.lp-price-summary{margin-top:12px;padding:13px;border-radius:12px;background:#f7f7f7}
-.lp-total{font-size:22px;font-weight:800;margin-top:7px}
-.lp-reserve-btn{width:100%;padding:13px;border:0;border-radius:11px;background:#111;color:#fff;font-weight:800;margin-top:12px}
-.lp-note{font-size:12px;color:#666;margin-top:8px}
-@media(max-width:600px){.lp-booking-grid{grid-template-columns:1fr}}
-</style>
-
-
-<style>
 /* Lofts Prime — layout desktop */
 @media (min-width: 701px){
   body{background:#e5eae7}
-  .app{width:min(1200px,100%);min-height:100vh;margin:auto;background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.08)}
+  .app{width:min(1400px,100%);min-height:100vh;margin:auto;background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.08)}
   header{padding:18px 42px;display:flex;align-items:center;justify-content:space-between}
   .logo{font-size:25px}
   header .small{font-size:12px}
   main{padding-bottom:50px}
-  .hero{padding:58px 42px 30px}
+  .hero{padding:58px 56px 34px}
   h1{font-size:50px;line-height:1.02}
   .hero>.small{font-size:14px;max-width:650px}
   .filters{padding:14px 16px;margin-top:25px}
@@ -56,12 +41,12 @@ main{padding-bottom:80px}.hero{padding:25px 16px 14px;background:linear-gradient
   .filters .field{border-bottom:0!important;border-right:1px solid var(--line)}
   .filters .field:last-child{border-right:0}
   .filters .btn{width:180px;margin:12px 0 0 auto;display:block}
-  .section{padding:16px 42px 40px}
+  .section{padding:18px 56px 50px}
   .section h2{font-size:26px;margin:10px 0 18px}
-  #cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  #cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
   .card{margin:0;box-shadow:0 5px 20px rgba(0,0,0,.05);transition:transform .18s ease,box-shadow .18s ease}
   .card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.09)}
-  .cover{height:250px}
+  .cover{height:300px}
   .body{padding:16px}
   .title{font-size:18px}
   .detail{padding:22px 42px 60px;max-width:1200px;margin:auto}
@@ -81,9 +66,9 @@ main{padding-bottom:80px}.hero{padding:25px 16px 14px;background:linear-gradient
   .lp-booking-box{max-width:620px}
 }
 @media (min-width: 1100px){
-  .hero{padding-left:70px;padding-right:70px}
-  .section,.detail{padding-left:70px;padding-right:70px}
-  .cover{height:280px}
+  .hero{padding-left:80px;padding-right:80px}
+  .section,.detail{padding-left:80px;padding-right:80px}
+  .cover{height:320px}
 }
 </style>
 </head><body><div class="app">
@@ -110,71 +95,4 @@ function reserve(){if(!cur){alert('Abra um loft primeiro.');return}$('sheet').in
 function goHome(){$('detail').style.display='none';$('home').style.display='block';window.scrollTo(0,0)}
 render(P);
 </script>
-<script>
-(function(){
-  const CLEANING=150;
-  const defaultPrices={
-    "canoas-garagem":260,
-    "canoas-sem-garagem":240,
-    "canela":350
-  };
-  const names={
-    "canoas-garagem":"Canoas Maxplaza — com garagem",
-    "canoas-sem-garagem":"Canoas Maxplaza — sem garagem",
-    "canela":"Canela — loft próximo à Catedral de Pedra"
-  };
-
-  function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-  function dayCount(a,b){
-    if(!a||!b)return 0;
-    const x=new Date(a+"T12:00:00"), y=new Date(b+"T12:00:00");
-    return Math.max(0,Math.round((y-x)/86400000));
-  }
-
-  function addBookingBox(){
-    // Place it before </body>; it is a site-level booking panel, preserving the existing visual site.
-    const box=document.createElement('section');
-    box.className='lp-booking-box';
-    box.innerHTML=`
-      <h3>Reserve seu loft</h3>
-      <div class="lp-booking-grid">
-        <div><label>Loft</label><select id="lp-loft" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:10px">
-          <option value="canoas-garagem">${names["canoas-garagem"]}</option>
-          <option value="canoas-sem-garagem">${names["canoas-sem-garagem"]}</option>
-          <option value="canela">${names["canela"]}</option>
-        </select></div>
-        <div><label>Hóspedes</label><input id="lp-guests" type="number" min="1" max="6" value="2"></div>
-        <div><label>Check-in</label><input id="lp-ci" type="date"></div>
-        <div><label>Check-out</label><input id="lp-co" type="date"></div>
-      </div>
-      <div class="lp-price-summary" id="lp-summary">Escolha as datas para calcular o valor.</div>
-      <button class="lp-reserve-btn" id="lp-reserve">Continuar para reserva</button>
-      <div class="lp-note">Faxina: R$ 150,00. Os preços das diárias serão editáveis no painel administrativo.</div>
-    `;
-    document.body.appendChild(box);
-
-    const ci=box.querySelector('#lp-ci'), co=box.querySelector('#lp-co');
-    const loft=box.querySelector('#lp-loft'), summary=box.querySelector('#lp-summary');
-    const today=new Date(); today.setHours(0,0,0,0);
-    const iso=today.toISOString().slice(0,10);
-    ci.min=iso; co.min=iso;
-
-    function calc(){
-      const n=dayCount(ci.value,co.value);
-      if(n<=0){summary.textContent='Escolha as datas para calcular o valor.';return;}
-      const p=defaultPrices[loft.value]||0, sub=n*p, total=sub+CLEANING;
-      summary.innerHTML=`<div>${n} diária(s) × ${money(p)} = ${money(sub)}</div>
-        <div>Faxina: ${money(CLEANING)}</div>
-        <div class="lp-total">Total: ${money(total)}</div>`;
-    }
-    [ci,co,loft].forEach(x=>x.addEventListener('change',calc));
-    box.querySelector('#lp-reserve').addEventListener('click',()=>{
-      if(dayCount(ci.value,co.value)<=0){alert('Selecione check-in e check-out.');return;}
-      alert('Próxima etapa: formulário do hóspede e pagamento Mercado Pago.');
-    });
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addBookingBox);else addBookingBox();
-})();
-</script>
-
 </body></html>
