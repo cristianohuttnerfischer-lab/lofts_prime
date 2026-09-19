@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>V3 - Painel — Lofts Prime</title>
+<title>V4 - Painel — Lofts Prime</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:#f4f7f5;color:#1e2925}
 header{background:#173d32;color:#fff;padding:20px 18px;position:sticky;top:0;z-index:10}
@@ -88,8 +88,7 @@ async function api(path,opts={}){
 }
 
 async function login(){
-  loginMsg.textContent='Entrando... V3';
-  loginMsg.textContent='Entrando...';
+  loginMsg.textContent='Entrando... V4';
   const emailValue=document.getElementById('email').value.trim();
   const passwordValue=document.getElementById('pass').value;
   if(!emailValue || !passwordValue) throw new Error('Informe e-mail e senha.');
@@ -101,7 +100,7 @@ async function login(){
       body:JSON.stringify({email:emailValue,password:passwordValue})
     });
   } catch(e) {
-    throw new Error('Não foi possível conectar ao Supabase. Verifique a conexão com a internet.');
+    throw new Error('Falha de comunicação com o Supabase: '+String(e && e.message || e));
   }
   let data={};
   try{data=await r.json()}catch{}
