@@ -95,17 +95,30 @@ const LOFT_UUIDS={
 let cur=null,pi=0, availabilityRequest=0;
 
 async function supabaseRPC(name, body){
-  const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+name,{
+  const url=SUPABASE_URL+'/rest/v1/rpc/'+name;
+  const r=await fetch(url,{
     method:'POST',
+    mode:'cors',
     headers:{
       'apikey':SUPABASE_KEY,
       'Authorization':'Bearer '+SUPABASE_KEY,
-      'Content-Type':'application/json'
+      'Content-Type':'application/json',
+      'Accept':'application/json'
     },
     body:JSON.stringify(body)
   });
-  if(!r.ok) throw new Error(await r.text());
-  return r.json();
+  const text=await r.text();
+  if(!r.ok){
+    const err=new Error('HTTP '+r.status+' '+r.statusText);
+    err.status=r.status;
+    err.body=text;
+    throw err;
+  }
+  try{return text?JSON.parse(text):[];}catch(e){
+    const err=new Error('Resposta inválida do Supabase');
+    err.body=text;
+    throw err;
+  }
 }
 
 function render(arr){
@@ -181,10 +194,11 @@ async function checkAvailability(){
     }
   }catch(e){
     if(token!==availabilityRequest) return;
-    box.textContent='Não foi possível consultar o calendário agora. Tente novamente.';
+    console.error('Lofts Prime — erro ao consultar calendário:', e, e.body || '');
+    const detalhe=e && e.status ? 'Erro HTTP '+e.status+'.' : 'Erro de comunicação.';
+    box.innerHTML='⚠️ <b>Não foi possível consultar o calendário.</b><br><span style="font-size:12px">'+detalhe+' Recarregue a página e tente novamente.</span>';
     box.style.color='#b42318';
     cur._available=false;
-    console.error(e);
   }
 }
 
