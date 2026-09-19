@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Painel — Lofts Prime</title>
+<title>V3 - Painel — Lofts Prime</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:#f4f7f5;color:#1e2925}
 header{background:#173d32;color:#fff;padding:20px 18px;position:sticky;top:0;z-index:10}
@@ -61,11 +61,9 @@ label{display:block;font-size:12px;font-weight:800;margin:13px 0 6px}input,texta
 </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://yfdhqczmtqujumqeokt.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmZGhxemN6bXRxdWp1bXFlb2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NzY3MDcsImV4cCI6MjEwNTM1MjcwN30.wnce-Yt1KddCNiSev-SZHZxAXEpE50XyRm4CII0V-m8';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const AMENITIES=[
 ['wifi','📶 Wi‑Fi'],['air_conditioning','❄️ Ar-condicionado'],['tv','📺 TV'],['kitchen','🍳 Cozinha'],
 ['garage','🚗 Garagem'],['hot_shower','🚿 Água quente'],['self_checkin','🔑 Self check-in'],['elevator','🛗 Elevador'],
@@ -90,6 +88,7 @@ async function api(path,opts={}){
 }
 
 async function login(){
+  loginMsg.textContent='Entrando... V3';
   loginMsg.textContent='Entrando...';
   const emailValue=document.getElementById('email').value.trim();
   const passwordValue=document.getElementById('pass').value;
@@ -155,7 +154,8 @@ async function save(){
   }catch(e){saveMsg.textContent='❌ '+e.message}
 }
 loginBtn.onclick=()=>login().catch(e=>loginMsg.textContent='❌ '+e.message);
-logout.onclick=async()=>{try{await sb.auth.signOut()}catch(e){} sessionStorage.removeItem('lp_admin_token');location.reload()};
+
+logout.onclick=()=>{sessionStorage.removeItem('lp_admin_token');location.reload()};
 photoFiles.addEventListener('change',()=>{});
 save.onclick=()=>save();
 function showApp(){login.style.display='none';app.style.display='block';logout.style.display='block';load().catch(e=>saveMsg.textContent='❌ '+e.message)}
