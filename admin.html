@@ -61,18 +61,11 @@ label{display:block;font-size:12px;font-weight:800;margin:13px 0 6px}input,texta
 </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// O painel precisa ser aberto pelo endereço publicado do site, não como arquivo local (content://).
-if (location.protocol === 'file:' || location.protocol === 'content:') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const box = document.getElementById('loginMsg');
-    if (box) box.innerHTML = '⚠️ Abra o painel pelo endereço <b>https://lofts-prime.pages.dev/admin.html</b> depois de publicar este arquivo no GitHub.';
-    const btn = document.getElementById('loginBtn');
-    if (btn) btn.disabled = true;
-  });
-}
 const SUPABASE_URL='https://yfdhqczmtqujumqeokt.supabase.co';
 const SUPABASE_KEY='sb_publishable_dZbP0NhugOAmNwnXHddFUA_wkdYN00_';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const AMENITIES=[
 ['wifi','📶 Wi‑Fi'],['air_conditioning','❄️ Ar-condicionado'],['tv','📺 TV'],['kitchen','🍳 Cozinha'],
 ['garage','🚗 Garagem'],['hot_shower','🚿 Água quente'],['self_checkin','🔑 Self check-in'],['elevator','🛗 Elevador'],
@@ -88,18 +81,27 @@ const IDS={
 let token=null,lofts=[],current=null;
 
 async function api(path,opts={}){
-  const r=await fetch(SUPABASE_URL+path,{...opts,headers:{
-    'apikey':SUPABASE_KEY,'Authorization':'Bearer '+(token||SUPABASE_KEY),
-    'Content-Type':'application/json',...(opts.headers||{})
-  }});
+  const headers={...(opts.headers||{})};
+  if(opts.body && !headers['Content-Type']) headers['Content-Type']='application/json';
+  if(token) headers['Authorization']='Bearer '+token;
+  const r=await fetch(SUPABASE_URL+path,{...opts,headers:{'apikey':SUPABASE_KEY,...headers}});
   if(!r.ok) throw new Error(await r.text());
   return r.status===204?null:r.json();
 }
+
 async function login(){
-  const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});
-  const d=await r.json(); if(!r.ok) throw new Error(d.error_description||d.msg||'Login inválido');
-  token=d.access_token; sessionStorage.setItem('lp_admin_token',token); showApp();
+  loginMsg.textContent='Entrando...';
+  const emailValue=document.getElementById('email').value.trim();
+  const passwordValue=document.getElementById('pass').value;
+  if(!emailValue || !passwordValue) throw new Error('Informe e-mail e senha.');
+  const {data,error}=await sb.auth.signInWithPassword({email:emailValue,password:passwordValue});
+  if(error) throw error;
+  token=data.session?.access_token||null;
+  if(!token) throw new Error('O Supabase não retornou a sessão.');
+  sessionStorage.setItem('lp_admin_token',token);
+  showApp();
 }
+
 async function load(){
   lofts=await api('/rest/v1/lofts?select=*&order=created_at.asc');
   renderList(); if(!current) select(lofts[0]?.id); else select(current.id);
@@ -142,10 +144,15 @@ async function save(){
   }catch(e){saveMsg.textContent='❌ '+e.message}
 }
 loginBtn.onclick=()=>login().catch(e=>loginMsg.textContent='❌ '+e.message);
-logout.onclick=()=>{sessionStorage.removeItem('lp_admin_token');location.reload()};
+logout.onclick=async()=>{try{await sb.auth.signOut()}catch(e){} sessionStorage.removeItem('lp_admin_token');location.reload()};
 photoFiles.addEventListener('change',()=>{});
 save.onclick=()=>save();
 function showApp(){login.style.display='none';app.style.display='block';logout.style.display='block';load().catch(e=>saveMsg.textContent='❌ '+e.message)}
-token=(location.protocol==='http:'||location.protocol==='https:')?sessionStorage.getItem('lp_admin_token'):null; if(token)showApp();
+(async()=>{
+  try{
+    const {data}=await sb.auth.getSession();
+    if(data.session){ token=data.session.access_token; showApp(); }
+  }catch(e){ console.warn(e); }
+})();
 </script>
 </body></html>
