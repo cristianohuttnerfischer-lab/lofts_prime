@@ -23,6 +23,7 @@ main{padding-bottom:80px}.hero{padding:25px 16px 14px;background:linear-gradient
 .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px;z-index:30}.bottom button{border:0;background:none;color:var(--muted);font-size:10px}.bottom b{display:block;color:var(--g);font-size:19px}
 .modal,.lb{display:none;position:fixed;inset:0;z-index:80}.modal{background:#0009}.modal.on{display:block}.sheet{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);background:#fff;border-radius:22px 22px 0 0;padding:18px}.close{float:right;border:0;border-radius:50%;width:34px;height:34px}
 .lb{background:#000;align-items:center;justify-content:center}.lb.on{display:flex}.lb img{max-width:100%;max-height:84vh}.lb button{position:absolute;border:0;border-radius:50%;width:40px;height:40px}.x{right:14px;top:14px}.l{left:10px;top:50%;font-size:25px}.r{right:10px;top:50%;font-size:25px}.count{position:absolute;bottom:18px;background:#0009;color:#fff;padding:6px 10px;border-radius:16px;font-size:11px}
+.calendar{margin-top:14px;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fafcfb}.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.cal-title{font-weight:900;font-size:14px;text-transform:capitalize}.cal-nav{border:1px solid var(--line);background:#fff;border-radius:9px;width:32px;height:32px;font-weight:900;color:var(--g);font-size:20px}.cal-week,.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal-week div{font-size:9px;text-align:center;color:var(--muted);font-weight:800;padding:4px 0}.cal-day{border:0;background:#fff;border-radius:8px;min-height:34px;font-size:12px;font-weight:800;color:#26302d}.cal-day.muted{background:transparent}.cal-day.occupied{background:#d94b4b;color:#fff;cursor:not-allowed;text-decoration:line-through}.cal-day.today{box-shadow:inset 0 0 0 2px var(--gold)}.cal-day.selected{background:var(--g);color:#fff}.cal-day.range{background:#dcebe5;color:var(--g)}.cal-day:disabled{opacity:1}.cal-legend{display:flex;gap:12px;align-items:center;margin-top:10px;font-size:10px;color:var(--muted)}.legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}.legend-red{background:#d94b4b}.legend-green{background:var(--g)}.calendar-msg{font-size:10px;color:var(--muted);margin-top:8px}
 </style>
 <style>
 /* Lofts Prime — layout desktop */
@@ -78,6 +79,7 @@ main{padding-bottom:80px}.hero{padding:25px 16px 14px;background:linear-gradient
 <div class="section"><h2>Lofts</h2><div id="cards"></div></div></main>
 <div id="detail" class="detail"><button class="back" onclick="goHome()">← Voltar</button><div id="gallery" class="gallery"></div><h2 id="dt"></h2><div id="dm" class="meta"></div><div id="tags"></div><p id="dd" class="small" style="font-size:13px;line-height:1.5"></p>
 <div class="box"><h3 style="margin:0 0 12px">Escolha suas datas</h3><div class="grid"><div class="field"><div class="label">Check-in</div><input id="cin" class="input" type="date"></div><div class="field"><div class="label">Check-out</div><input id="cout" class="input" type="date"></div></div>
+<div id="calendar" class="calendar"><div class="cal-head"><button type="button" class="cal-nav" id="calPrev" aria-label="Mês anterior">‹</button><div id="calTitle" class="cal-title"></div><button type="button" class="cal-nav" id="calNext" aria-label="Próximo mês">›</button></div><div class="cal-week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div id="calDays" class="cal-days"></div><div class="cal-legend"><span><span class="legend-dot legend-red"></span>Ocupado</span><span><span class="legend-dot legend-green"></span>Disponível</span></div><div id="calMsg" class="calendar-msg">Consultando calendário...</div></div>
 <div class="summary"><div class="line"><span id="nights">0 noites</span><span id="stay">R$ 0</span></div><div class="line"><span>Limpeza</span><span id="fee">R$ 0</span></div><div class="total"><span>Total</span><span id="tot">R$ 0</span></div><div id="availability" class="small" style="margin-top:10px;line-height:1.4"></div></div><button class="btn" onclick="reserve()">Continuar para reserva</button></div></div>
 <div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
 <div id="lb" class="lb"><button class="x" onclick="closeLB()">✕</button><button class="l" onclick="move(-1)">‹</button><img id="lbi"><button class="r" onclick="move(1)">›</button><div id="count" class="count"></div></div>
@@ -260,7 +262,45 @@ function openP(id){
   $('cin').value=a.toISOString().slice(0,10);
   $('cout').value=b.toISOString().slice(0,10);
   calc();
+  loadCalendar();
 }
+
+let blockedRanges=[];
+let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let calendarLoading=false;
+function dateKey(d){return d.toISOString().slice(0,10)}
+function isOccupiedDate(key){return blockedRanges.some(r=>key>=r.start_date && key<r.end_date)}
+function isBeforeToday(key){const t=new Date();const today=new Date(t.getFullYear(),t.getMonth(),t.getDate());return key<dateKey(today)}
+function renderCalendar(){
+  if(!cur || !$('calDays')) return;
+  $('calTitle').textContent=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(calendarMonth);
+  const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),offset=first.getDay();
+  let h=''; for(let i=0;i<offset;i++) h+='<span class="cal-day muted"></span>';
+  for(let day=1;day<=last.getDate();day++){
+    const d=new Date(y,m,day,12),key=dateKey(d),occupied=isOccupiedDate(key),past=isBeforeToday(key),selected=key===$('cin').value||key===$('cout').value,inRange=$('cin').value&&$('cout').value&&key>$('cin').value&&key<$('cout').value,cls=['cal-day'];
+    if(occupied)cls.push('occupied'); if(selected)cls.push('selected'); else if(inRange)cls.push('range'); if(key===dateKey(new Date()))cls.push('today');
+    h+=`<button type="button" class="${cls.join(' ')}" ${occupied||past?'disabled':''} onclick="pickCalendarDate('${key}')">${day}</button>`;
+  }
+  $('calDays').innerHTML=h; $('calMsg').textContent=calendarLoading?'Consultando calendário...':'Datas em vermelho estão ocupadas e não podem ser selecionadas.'; $('calMsg').style.color='';
+}
+function pickCalendarDate(key){
+  if(isOccupiedDate(key)||isBeforeToday(key))return;
+  const cin=$('cin').value,cout=$('cout').value;
+  if(!cin||cout||key<cin){$('cin').value=key;$('cout').value='';}
+  else if(key>cin){const start=new Date(cin+'T12:00:00'),end=new Date(key+'T12:00:00');for(let d=new Date(start);d<end;d.setDate(d.getDate()+1)){if(isOccupiedDate(dateKey(d))){$('calMsg').textContent='Há uma data ocupada dentro desse período. Escolha outra data de saída.';$('calMsg').style.color='#b42318';return;}}$('cout').value=key;}
+  renderCalendar();calc();
+}
+async function loadCalendar(){
+  if(!cur)return; calendarLoading=true;blockedRanges=[];calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderCalendar();
+  try{
+    const now=new Date(),start=dateKey(new Date(now.getFullYear(),now.getMonth(),1)),end=dateKey(new Date(now.getFullYear()+1,now.getMonth()+1,1));
+    const r=await fetch(`${WORKER_URL}/availability?loft_id=${encodeURIComponent(cur.dbId||LOFT_UUIDS[cur.id])}&start=${start}&end=${end}&ts=${Date.now()}`,{cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}});
+    const data=await r.json(); if(!r.ok||data.ok!==true)throw new Error(data.error||`Erro HTTP ${r.status}`);
+    blockedRanges=(data.blocked||[]).filter(x=>x.start_date&&x.end_date).map(x=>({start_date:x.start_date,end_date:x.end_date,source:x.source,status:x.status}));calendarLoading=false;renderCalendar();checkAvailability();
+  }catch(e){calendarLoading=false;if($('calMsg')){$('calMsg').textContent='⚠️ Não foi possível carregar as datas ocupadas. Tente novamente.';$('calMsg').style.color='#b42318';}renderCalendar();console.error(e);}
+}
+if($('calPrev'))$('calPrev').addEventListener('click',()=>{const now=new Date(),min=new Date(now.getFullYear(),now.getMonth(),1),prev=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);if(prev>=min){calendarMonth=prev;renderCalendar();}});
+if($('calNext'))$('calNext').addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar();});
 
 async function checkAvailability(){
   if(!cur) return;
@@ -294,8 +334,8 @@ function calc(){
   checkAvailability();
 }
 
-$('cin').addEventListener('change',calc);
-$('cout').addEventListener('change',calc);
+$('cin').addEventListener('change',()=>{renderCalendar();calc();});
+$('cout').addEventListener('change',()=>{renderCalendar();calc();});
 
 function openLB(i){pi=i;showPhoto();$('lb').classList.add('on')}
 function showPhoto(){const im=cur?.images||[PHOTO_FALLBACK];pi=Math.max(0,Math.min(pi,im.length-1));$('lbi').src=im[pi];$('count').textContent=`${pi+1} / ${im.length}`}
