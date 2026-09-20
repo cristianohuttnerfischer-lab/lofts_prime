@@ -108,36 +108,70 @@ function localConfigForDb(db){
   return null;
 }
 
-function mergePublicData(data){
-  const dbLofts=Array.isArray(data.lofts)?data.lofts:[];
-  const prices=Array.isArray(data.prices)?data.prices:[];
-  const daily=Array.isArray(data.daily_prices)?data.daily_prices:[];
-  const priceMap=Object.fromEntries(prices.map(x=>[x.loft_id,Number(x.nightly_price||0)]));
+function normalizePublicPayload(raw){
+  // Aceita tanto a resposta direta do Worker quanto respostas eventualmente
+  // encapsuladas em {data:{...}}.
+  const data = raw && raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data)
+    ? raw.data : (raw || {});
+  return {
+    lofts: Array.isArray(data.lofts) ? data.lofts : [],
+    prices: Array.isArray(data.prices) ? data.prices :
+            (Array.isArray(data.loft_prices) ? data.loft_prices : []),
+    daily_prices: Array.isArray(data.daily_prices) ? data.daily_prices :
+                  (Array.isArray(data.dailyPrices) ? data.dailyPrices : []),
+    settings: data.settings || {}
+  };
+}
+
+function mergePublicData(raw){
+  const data=normalizePublicPayload(raw);
+  const dbLofts=data.lofts;
+  const prices=data.prices;
+  const daily=data.daily_prices;
+
+  const priceMap=Object.fromEntries(
+    prices.map(x=>[x.loft_id,Number(x.nightly_price ?? x.price ?? 0)])
+  );
+
   const knownById={};
   P.forEach(p=>{
     const dbId=LOFT_UUIDS[p.id];
     knownById[dbId]=p;
   });
+
   const merged=dbLofts.map(db=>{
-    const base=knownById[db.id] || {id:db.id,title:'Loft',city:'',garage:false,rate:0,cleaning:150,images:[PHOTO_FALLBACK],description:''};
+    const base=knownById[db.id] || {
+      id:db.id,title:'Loft',city:'',garage:false,rate:0,
+      cleaning:150,images:[PHOTO_FALLBACK],description:''
+    };
+
     const rate=priceMap[db.id];
-    return {...base,
+
+    return {
+      ...base,
       dbId:db.id,
-      title:db.name || base.title,
-      city:db.location || base.city,
-      description:db.description || base.description,
-      rate:(Number.isFinite(rate)&&rate>0)?rate:Number(base.rate||0),
+      title:(db.name ?? base.title),
+      city:(db.location ?? base.city),
+      description:(db.description ?? base.description),
+      rate:(Number.isFinite(rate)&&rate>0) ? rate : Number(base.rate||0),
       cleaning:Number(db.cleaning_fee ?? base.cleaning ?? 150),
       max_guests:Number(db.max_guests ?? base.max_guests ?? 2),
-      airbnb_url:db.airbnb_url || base.airbnb_url || '',
-      active:db.active!==false,
-      dailyPrices:daily.filter(x=>x.loft_id===db.id).map(x=>({date:x.price_date,price:Number(x.nightly_price||0)})),
-      images:(base.images&&base.images.length)?base.images:[PHOTO_FALLBACK]
+      airbnb_url:db.airbnb_url ?? base.airbnb_url ?? '',
+      active:db.active !== false,
+      dailyPrices:daily
+        .filter(x=>x.loft_id===db.id)
+        .map(x=>({
+          date:x.price_date ?? x.date,
+          price:Number(x.nightly_price ?? x.price ?? 0)
+        })),
+      images:(base.images&&base.images.length) ? base.images : [PHOTO_FALLBACK]
     };
   });
+
   if(merged.length) P=merged;
-  publicDataCache=data;
+  publicDataCache=raw;
   render(P);
+
   if(cur){
     const updated=P.find(x=>x.dbId===cur.dbId || x.id===cur.id);
     if(updated) cur=updated;
@@ -146,20 +180,23 @@ function mergePublicData(data){
 
 async function loadPublicData(){
   try{
-    const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
-    const data=await r.json();
-    if(!r.ok || data.ok!==true) throw new Error(data.error || `HTTP ${r.status}`);
-    mergePublicData(data);
+    const url=`${WORKER_URL}/public/data?ts=${Date.now()}`;
+    const r=await fetch(url,{
+      method:'GET',
+      cache:'no-store',
+      headers:{
+        'Accept':'application/json',
+        'Cache-Control':'no-cache, no-store, max-age=0'
+      }
+    });
+    const raw=await r.json();
+    if(!r.ok || raw.ok!==true) throw new Error(raw.error || `HTTP ${r.status}`);
+    mergePublicData(raw);
+    document.documentElement.dataset.dynamicData='ok';
   }catch(e){
     console.warn('Dados dinâmicos indisponíveis:',e);
+    document.documentElement.dataset.dynamicData='error';
   }
-}
-
-async function availabilityViaWorker(loftId,start,end){
-  const r=await fetch(`${WORKER_URL}/availability?loft_id=${encodeURIComponent(loftId)}&start=${start}&end=${end}&ts=${Date.now()}`,{cache:'no-store'});
-  const data=await r.json();
-  if(!r.ok || data.ok!==true) throw new Error(data.error || `HTTP ${r.status}`);
-  return data;
 }
 
 function nightlyRateForDate(date){
@@ -281,5 +318,5 @@ function goHome(){$('detail').style.display='none';$('home').style.display='bloc
 
 render(P);
 loadPublicData();
-</script></script>
+</script>
 </body></html>
