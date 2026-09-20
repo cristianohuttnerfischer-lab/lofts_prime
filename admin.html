@@ -27,6 +27,7 @@ textarea{min-height:110px;resize:vertical}.btn{border:0;border-radius:11px;paddi
 .empty{background:#fff;border:1px dashed #ccd3dd;border-radius:18px;padding:45px;text-align:center;color:#667085}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:15px;z-index:20}.modal.open{display:flex}.modalbox{background:#fff;width:min(760px,100%);max-height:94vh;overflow:auto;border-radius:22px;padding:23px}.modalhead{display:flex;justify-content:space-between;align-items:start;gap:15px}.close{background:#f2f4f7;border:0;border-radius:9px;width:36px;height:36px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}.full{grid-column:1/-1}.formactions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px;padding-top:16px;border-top:1px solid #eaecf0}
 @media(max-width:900px){.cards{grid-template-columns:1fr 1fr}}@media(max-width:620px){.top{padding:0 15px}.wrap{padding:16px}.hero{display:block}.topactions{margin-top:15px}.cards{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}}
+.amenity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}.amenity-item{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #e3e7ed;border-radius:10px;background:#fafbfc;font-size:13px}.amenity-item input{width:auto}.photosbox{border:1px solid #e3e7ed;border-radius:14px;padding:12px;background:#fafbfc}.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.photo-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#e5e7eb}.photo-item img{width:100%;height:100%;object-fit:cover}.photo-item button{position:absolute;right:5px;top:5px;border:0;border-radius:8px;background:#fff;color:#b42318;padding:4px 7px;font-weight:800;box-shadow:0 2px 8px #0003}.photo-add{display:flex;gap:8px;margin-top:10px}.photo-add input{flex:1}.photo-help{font-size:12px;color:#667085;margin-top:6px}@media(max-width:620px){.amenity-grid{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -64,6 +65,21 @@ textarea{min-height:110px;resize:vertical}.btn{border:0;border-radius:11px;paddi
     <div class="full"><label>Descrição</label><textarea id="description"></textarea></div>
     <div class="full"><label>Link do anúncio Airbnb</label><input id="airbnb" placeholder="https://www.airbnb.com.br/rooms/..."></div>
     <div class="full"><label>Calendário iCal Airbnb</label><input id="ical" placeholder="Opcional — usado para sincronização de disponibilidade"></div>
+    <div class="full"><label>Comodidades</label><div class="amenity-grid" id="amenities">
+      <label class="amenity-item"><input type="checkbox" value="garage"> 🚗 Garagem</label>
+      <label class="amenity-item"><input type="checkbox" value="pool"> 🏊 Piscina</label>
+      <label class="amenity-item"><input type="checkbox" value="gym"> 🏋️ Academia</label>
+      <label class="amenity-item"><input type="checkbox" value="wifi"> 📶 Wi‑Fi</label>
+      <label class="amenity-item"><input type="checkbox" value="self_checkin"> 🔑 Self check-in</label>
+      <label class="amenity-item"><input type="checkbox" value="air_conditioning"> ❄️ Ar-condicionado</label>
+      <label class="amenity-item"><input type="checkbox" value="heating"> 🔥 Aquecimento</label>
+      <label class="amenity-item"><input type="checkbox" value="kitchen"> 🍳 Cozinha</label>
+      <label class="amenity-item"><input type="checkbox" value="washing_machine"> 🧺 Máquina de lavar</label>
+      <label class="amenity-item"><input type="checkbox" value="tv"> 📺 TV</label>
+      <label class="amenity-item"><input type="checkbox" value="hot_water"> 🚿 Água quente</label>
+      <label class="amenity-item"><input type="checkbox" value="elevator"> 🛗 Elevador</label>
+    </div></div>
+    <div class="full"><label>Galeria de fotos</label><div class="photosbox"><input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="uploadPhoto()"><div class="photo-help">Escolha uma foto para enviar. Máximo de 8 MB por foto.</div><div id="photoGrid" class="photo-grid"></div><div class="photo-add"><input id="photoUrl" placeholder="Ou cole o endereço de uma foto (URL)"><button type="button" class="btn light" onclick="addPhotoUrl()">Adicionar URL</button></div></div></div>
    </div>
    <div class="formactions"><button type="button" class="btn light" onclick="closeModal()">Cancelar</button><button class="btn primary" type="submit">Salvar alterações</button></div>
   </form>
@@ -75,7 +91,7 @@ const W='https://lofts-prime-sync.cristianohuttnerfischer.workers.dev';
 let token=localStorage.getItem('lofts_prime_admin_token')||'', data={lofts:[],prices:[]};
 
 function notice(msg,type='ok',where='notice'){let e=document.getElementById(where);e.textContent=msg;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4500)}
-async function api(path,opt={}){opt.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opt.headers||{});let r=await fetch(W+path,opt),t=await r.text(),j;try{j=JSON.parse(t)}catch{throw Error(t||'Erro HTTP '+r.status)}if(!r.ok||j.ok===false)throw Error(j.error||j.message||'Erro HTTP '+r.status);return j}
+async function api(path,opt={}){const isForm=opt.body instanceof FormData;opt.headers=Object.assign({'Authorization':'Bearer '+token},isForm?{}:{'Content-Type':'application/json'},opt.headers||{});let r=await fetch(W+path,opt),t=await r.text(),j;try{j=JSON.parse(t)}catch{throw Error(t||'Erro HTTP '+r.status)}if(!r.ok||j.ok===false)throw Error(j.error||j.message||'Erro HTTP '+r.status);return j}
 async function login(){
  try{let r=await fetch(W+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('password').value})});let j=await r.json();if(!r.ok||j.ok===false)throw Error(j.error||'Não foi possível entrar');token=j.access_token;localStorage.setItem('lofts_prime_admin_token',token);showApp();loadData()}catch(e){notice('❌ '+e.message,'err','loginNotice')}
 }
@@ -92,17 +108,23 @@ function render(){
  <div class="cover">🏠</div><div class="pbody"><h2>${esc(l.name||'Sem nome')}</h2><div class="location">${esc(l.location||'Localização não informada')}</div>
  <div class="tags"><span class="tag">👥 ${l.max_guests||2} hóspedes</span><span class="tag">${l.active===false?'⚪ Inativo':'🟢 Ativo'}</span></div>
  <div class="price">${money(p?.nightly_price)} <small>/ diária</small></div>
- <div class="pactions"><button class="btn primary" onclick="edit('${l.id}')">Editar apartamento</button><button class="btn light" onclick="photos()">📷 Fotos</button></div>
+ <div class="pactions"><button class="btn primary" onclick="edit('${l.id}')">Editar apartamento</button><button class="btn light" onclick="edit('${l.id}')">📷 Fotos e comodidades</button></div>
  </div></article>`}).join('')
 }
-function fill(l){let p=(data.prices||[]).find(x=>x.loft_id===l.id);document.getElementById('id').value=l.id||'';document.getElementById('name').value=l.name||'';document.getElementById('location').value=l.location||'';document.getElementById('guests').value=l.max_guests||2;document.getElementById('price').value=p?.nightly_price??0;document.getElementById('cleaning').value=l.cleaning_fee??150;document.getElementById('description').value=l.description||'';document.getElementById('airbnb').value=l.airbnb_url||'';document.getElementById('ical').value=''}
+function fill(l){let p=(data.prices||[]).find(x=>x.loft_id===l.id);document.getElementById('id').value=l.id||'';document.getElementById('name').value=l.name||'';document.getElementById('location').value=l.location||'';document.getElementById('guests').value=l.max_guests||2;document.getElementById('price').value=p?.nightly_price??0;document.getElementById('cleaning').value=l.cleaning_fee??150;document.getElementById('description').value=l.description||'';document.getElementById('airbnb').value=l.airbnb_url||'';document.getElementById('ical').value='';document.querySelectorAll('#amenities input').forEach(x=>x.checked=(l.amenities||[]).includes(x.value));renderPhotos(l.photos||[])}
 function edit(id){let l=data.lofts.find(x=>x.id===id);if(!l)return;document.getElementById('mtitle').textContent='Editar apartamento';fill(l);openModal()}
 function newProperty(){document.getElementById('mtitle').textContent='Novo apartamento';fill({});document.getElementById('id').value='';openModal()}
-async function save(ev){ev.preventDefault();let currentId=document.getElementById('id').value||null;let body={loft_id:currentId,name:document.getElementById('name').value.trim(),location:document.getElementById('location').value.trim(),max_guests:Number(document.getElementById('guests').value||2),cleaning_fee:Number(document.getElementById('cleaning').value||0),description:document.getElementById('description').value.trim(),airbnb_url:document.getElementById('airbnb').value.trim()};try{let r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});let id=r.loft?.id||r.loft_id||r.id||currentId;if(!id)throw Error('O banco não retornou o ID do apartamento');const priceValue=Number(document.getElementById('price').value||0);
+async function save(ev){ev.preventDefault();let currentId=document.getElementById('id').value||null;let amenities=[...document.querySelectorAll('#amenities input:checked')].map(x=>x.value);let photos=currentPhotos();let body={loft_id:currentId,name:document.getElementById('name').value.trim(),location:document.getElementById('location').value.trim(),max_guests:Number(document.getElementById('guests').value||2),cleaning_fee:Number(document.getElementById('cleaning').value||0),description:document.getElementById('description').value.trim(),airbnb_url:document.getElementById('airbnb').value.trim(),amenities,photos};try{let r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});let id=r.loft?.id||r.loft_id||r.id||currentId;if(!id)throw Error('O banco não retornou o ID do apartamento');const priceValue=Number(document.getElementById('price').value||0);
 await api('/admin/price',{method:'POST',body:JSON.stringify({loft_id:id,nightly_price:priceValue})});let ical=document.getElementById('ical').value.trim();if(ical)await api('/admin/channel-calendar',{method:'POST',body:JSON.stringify({loft_id:id,channel:'Airbnb',calendar_url:ical})});closeModal();notice('✅ Alterações salvas no banco de dados.');await loadData()}catch(e){notice('❌ '+e.message,'err','formNotice')}}
 function openModal(){document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
-function photos(){notice('📷 A próxima etapa será o gerenciamento real de fotos pelo Supabase Storage.')}
+let photoState=[];
+function currentPhotos(){return [...photoState]}
+function renderPhotos(arr){photoState=Array.isArray(arr)?[...arr]:[];const g=document.getElementById('photoGrid');g.innerHTML=photoState.map((url,i)=>`<div class="photo-item"><img src="${esc(url)}" onerror="this.style.opacity=.35"><button type="button" onclick="removePhoto(${i})">×</button></div>`).join('')}
+async function uploadPhoto(){const file=document.getElementById('photoFile').files[0],id=document.getElementById('id').value;if(!file||!id)return;try{const fd=new FormData();fd.append('loft_id',id);fd.append('file',file);await api('/admin/photo',{method:'POST',body:fd});document.getElementById('photoFile').value='';await loadData();const l=data.lofts.find(x=>x.id===id);if(l)fill(l);notice('✅ Foto adicionada.')}catch(e){notice('❌ '+e.message,'err','formNotice')}}
+async function removePhoto(i){const id=document.getElementById('id').value,url=photoState[i];if(!id||!url)return;if(!confirm('Remover esta foto da galeria?'))return;try{await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:id,url})});await loadData();const l=data.lofts.find(x=>x.id===id);if(l)fill(l);notice('✅ Foto removida.')}catch(e){notice('❌ '+e.message,'err','formNotice')}}
+async function addPhotoUrl(){const id=document.getElementById('id').value,url=document.getElementById('photoUrl').value.trim();if(!id||!url)return;photoState.push(url);document.getElementById('photoUrl').value='';renderPhotos(photoState);try{await api('/admin/loft',{method:'POST',body:JSON.stringify({loft_id:id,photos:photoState})});await loadData();const l=data.lofts.find(x=>x.id===id);if(l)fill(l);notice('✅ Foto adicionada por URL.')}catch(e){notice('❌ '+e.message,'err','formNotice')}}
+function photos(){const l=data.lofts[0];}
 if(token){showApp();loadData()}
 </script>
 </body></html>
