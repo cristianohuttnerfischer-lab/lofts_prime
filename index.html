@@ -108,7 +108,7 @@ async function loadPublicData(){
     const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{
       method:'GET',
       cache:'no-store',
-      headers:{'Accept':'application/json','Cache-Control':'no-cache, no-store, max-age=0'}
+      headers:{'Accept':'application/json'}
     });
     const raw=await r.json();
     if(!r.ok || raw.ok!==true) throw new Error(raw.error||`HTTP ${r.status}`);
