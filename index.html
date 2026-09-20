@@ -192,13 +192,28 @@ async function loadPublicData(){
       }
     });
     const raw=await r.json();
-    if(!r.ok || raw.ok!==true) throw new Error(raw.error || `HTTP ${r.status}`);
+    if(!r.ok) throw new Error(raw.error || `HTTP ${r.status}`);
+    if(!Array.isArray(raw.lofts) && !(raw.data && Array.isArray(raw.data.lofts))) {
+      throw new Error(raw.error || 'Resposta sem dados de lofts');
+    }
     mergePublicData(raw);
     document.documentElement.dataset.dynamicData='ok';
   }catch(e){
     console.warn('Dados dinâmicos indisponíveis:',e);
     document.documentElement.dataset.dynamicData='error';
   }
+}
+
+async function availabilityViaWorker(loftId,start,end){
+  const url=`${WORKER_URL}/availability?loft_id=${encodeURIComponent(loftId)}&start=${start}&end=${end}&ts=${Date.now()}`;
+  const r=await fetch(url,{
+    method:'GET',
+    cache:'no-store',
+    headers:{'Accept':'application/json','Cache-Control':'no-cache, no-store, max-age=0'}
+  });
+  const data=await r.json();
+  if(!r.ok || data.ok!==true) throw new Error(data.error || `HTTP ${r.status}`);
+  return data;
 }
 
 function nightlyRateForDate(date){
