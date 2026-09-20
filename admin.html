@@ -5,169 +5,171 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lofts Prime — Painel</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f6f8;color:#20242a}
-.wrap{max-width:1100px;margin:auto;padding:20px}.card{background:#fff;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 4px 18px #0000000b}
-h1{margin:0 0 6px}.muted{color:#68717d}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-input,textarea,button{width:100%;padding:12px;border:1px solid #d8dde3;border-radius:10px;font:inherit}
-textarea{min-height:100px;resize:vertical}button{background:#111;color:#fff;border:0;cursor:pointer;font-weight:700}
-button.secondary{background:#e9edf1;color:#20242a}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;margin-top:12px}
-.actions button{width:auto}.hidden{display:none}.status{padding:10px;border-radius:10px;background:#eef6ff;margin-top:12px}.error{background:#fff0f0;color:#a40000}
-.price{font-size:24px;font-weight:700}.loft h2{margin-top:0}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.wrap{padding:12px}}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f6f8;color:#17202a}
+header{background:#111827;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header strong{font-size:20px}header span{font-size:13px;opacity:.75}
+main{max-width:1180px;margin:auto;padding:20px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}
+.primary{background:#111827;color:#fff}.secondary{background:#fff;border:1px solid #d8dde5}.danger{background:#fee2e2;color:#991b1b}
+.card{background:#fff;border:1px solid #e2e6ec;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #00000008}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+h2{margin:0 0 5px;font-size:19px}.muted{color:#667085;font-size:13px}.price{font-size:20px;font-weight:800;margin:12px 0}
+label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#475467}
+input,textarea,select{width:100%;padding:11px;border:1px solid #d5dae2;border-radius:9px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.open{display:flex}.box{background:#fff;border-radius:18px;width:min(700px,100%);max-height:92vh;overflow:auto;padding:22px}
+.notice{padding:11px 13px;border-radius:10px;margin-bottom:12px;font-size:13px;display:none}.ok{background:#ecfdf3;color:#087443}.err{background:#fef2f2;color:#b42318}
+.spinner{opacity:.65}.empty{text-align:center;padding:35px;color:#667085}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-<div id="loginCard" class="card" style="max-width:460px;margin:50px auto">
-  <h1>Painel Lofts Prime</h1>
-  <p class="muted">Acesso administrativo</p>
-  <label>E-mail</label>
-  <input id="email" type="email" autocomplete="username">
-  <br><br>
-  <label>Senha</label>
-  <input id="password" type="password" autocomplete="current-password">
-  <br><br>
-  <button onclick="login()">Entrar</button>
-  <div id="loginMsg"></div>
-</div>
-
-<div id="panel" class="hidden">
-  <div class="card">
-    <h1>Painel Lofts Prime</h1>
-    <p class="muted">Edite os dados básicos dos seus lofts.</p>
-    <div class="actions">
-      <button onclick="loadData()">Atualizar dados</button>
-      <button class="secondary" onclick="logout()">Sair</button>
-    </div>
-    <div id="msg"></div>
+<header><div><strong>Lofts Prime</strong><br><span>Painel administrativo</span></div><span id="status">Conectando...</span></header>
+<main>
+  <div id="notice" class="notice"></div>
+  <div class="toolbar">
+    <button class="primary" onclick="newLoft()">＋ Novo apartamento</button>
+    <button class="secondary" onclick="importAirbnb()">↗ Importar anúncio do Airbnb</button>
+    <button class="secondary" onclick="loadData()">↻ Atualizar</button>
+    <button class="secondary" onclick="logout()">Sair</button>
   </div>
+  <div id="lofts" class="grid"><div class="empty">Carregando...</div></div>
+</main>
 
-  <div id="lofts" class="grid"></div>
-</div>
-
+<div id="modal" class="modal">
+ <div class="box">
+  <h2 id="modalTitle">Novo apartamento</h2>
+  <div id="formNotice" class="notice"></div>
+  <form onsubmit="saveLoft(event)">
+   <input type="hidden" id="loftId">
+   <label>Nome do apartamento</label><input id="name" required>
+   <label>Descrição</label><textarea id="description"></textarea>
+   <div class="row">
+    <div><label>Cidade / localização</label><input id="location"></div>
+    <div><label>Máximo de hóspedes</label><input id="maxGuests" type="number" min="1" value="2"></div>
+   </div>
+   <div class="row">
+    <div><label>Diária padrão (R$)</label><input id="price" type="number" min="0" step=".01" required></div>
+    <div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div>
+   </div>
+   <label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/...">
+   <label>URL do calendário iCal Airbnb (opcional)</label><input id="icalUrl" placeholder="Cole aqui somente se quiser cadastrar um calendário novo">
+   <div class="actions">
+    <button class="primary" type="submit">💾 Salvar alterações</button>
+    <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
+   </div>
+  </form>
+ </div>
 </div>
 
 <script>
-const WORKER = "https://lofts-prime-sync.cristianohuttnerfischer.workers.dev";
-let token = localStorage.getItem("lofts_prime_admin_token") || "";
+const WORKER='https://lofts-prime-sync.cristianohuttnerfischer.workers.dev';
+let token=localStorage.getItem('lofts_prime_admin_token')||'';
+let data={lofts:[],prices:[],settings:[]};
 
-function esc(v){
-  return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function show(msg,type='ok',target='notice'){
+ const e=document.getElementById(target);e.textContent=msg;e.className='notice '+type;e.style.display='block';
+ setTimeout(()=>e.style.display='none',4000);
 }
-
-function message(text,error=false){
-  const el=document.getElementById("msg");
-  el.className="status"+(error?" error":"");
-  el.textContent=text;
+async function api(path,opts={}){
+ opts.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opts.headers||{});
+ const r=await fetch(WORKER+path,opts);
+ const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
+ if(!r.ok||j.ok===false) throw new Error(j.error||j.message||('HTTP '+r.status));
+ return j;
 }
-
-async function login(){
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  const out=document.getElementById("loginMsg");
-  out.className="status";
-  out.textContent="Entrando...";
-  try{
-    const r=await fetch(WORKER+"/admin/login",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password})
-    });
-    const d=await r.json();
-    if(!r.ok || !d.ok) throw new Error(d.error||"Falha no login");
-    token=d.access_token;
-    localStorage.setItem("lofts_prime_admin_token",token);
-    document.getElementById("loginCard").classList.add("hidden");
-    document.getElementById("panel").classList.remove("hidden");
-    await loadData();
-  }catch(e){
-    out.className="status error";
-    out.textContent=e.message;
-  }
-}
-
-function logout(){
-  token="";
-  localStorage.removeItem("lofts_prime_admin_token");
-  document.getElementById("panel").classList.add("hidden");
-  document.getElementById("loginCard").classList.remove("hidden");
-}
-
-async function api(path,options={}){
-  options.headers={...(options.headers||{}),Authorization:"Bearer "+token,"Content-Type":"application/json"};
-  const r=await fetch(WORKER+path,options);
-  const d=await r.json();
-  if(r.status===401){logout();throw new Error("Sessão expirada. Faça login novamente.");}
-  if(!r.ok || !d.ok) throw new Error(d.error||"Erro");
-  return d;
-}
-
 async function loadData(){
-  try{
-    message("Carregando...");
-    const d=await api("/admin/data");
-    const priceMap={};
-    for(const p of d.prices||[]) priceMap[p.loft_id]=p.nightly_price;
-    document.getElementById("lofts").innerHTML=(d.lofts||[]).map(l=>`
-      <div class="card loft">
-        <h2>${esc(l.name)}</h2>
-        <p class="muted">${esc(l.location||"")}</p>
-
-        <label>Nome</label>
-        <input id="name-${l.id}" value="${esc(l.name)}">
-
-        <br><br><label>Descrição</label>
-        <textarea id="desc-${l.id}">${esc(l.description||"")}</textarea>
-
-        <br><br><div class="row">
-          <div>
-            <label>Preço padrão / noite</label>
-            <input id="price-${l.id}" type="number" min="0" step="1" value="${priceMap[l.id]??0}">
-          </div>
-          <div>
-            <label>Taxa de limpeza</label>
-            <input id="clean-${l.id}" type="number" min="0" step="1" value="${l.cleaning_fee??150}">
-          </div>
-        </div>
-
-        <div class="actions">
-          <button onclick="saveLoft('${l.id}')">Salvar alterações</button>
-        </div>
-      </div>
-    `).join("");
-    message("Dados carregados.");
-  }catch(e){message(e.message,true);}
+ if(!token){location.href='admin.html';return}
+ try{
+  const j=await api('/admin/data');data=j;
+  document.getElementById('status').textContent='● Conectado';
+  render();
+ }catch(e){
+  document.getElementById('status').textContent='Erro de conexão';
+  show(e.message,'err');
+ }
 }
-
-async function saveLoft(id){
-  try{
-    message("Salvando...");
-    await api("/admin/loft",{
-      method:"POST",
-      body:JSON.stringify({
-        loft_id:id,
-        name:document.getElementById("name-"+id).value,
-        description:document.getElementById("desc-"+id).value,
-        cleaning_fee:Number(document.getElementById("clean-"+id).value)
-      })
-    });
-    await api("/admin/price",{
-      method:"POST",
-      body:JSON.stringify({
-        loft_id:id,
-        nightly_price:Number(document.getElementById("price-"+id).value)
-      })
-    });
-    message("Alterações salvas com sucesso.");
-  }catch(e){message(e.message,true);}
+function render(){
+ const el=document.getElementById('lofts');
+ if(!data.lofts?.length){el.innerHTML='<div class="empty">Nenhum apartamento cadastrado.</div>';return}
+ el.innerHTML=data.lofts.map(l=>{
+  const p=(data.prices||[]).find(x=>x.loft_id===l.id);
+  const price=p?Number(p.price):0;
+  return `<div class="card">
+    <span class="badge">${l.active===false?'Inativo':'Ativo'}</span>
+    <h2 style="margin-top:10px">${esc(l.name||'Sem nome')}</h2>
+    <div class="muted">${esc(l.location||'Localização não informada')}</div>
+    <div class="price">R$ ${price.toFixed(2).replace('.',',')} <small class="muted">/ diária</small></div>
+    <div class="muted">Até ${l.max_guests||2} hóspedes · Limpeza R$ ${Number(l.cleaning_fee??150).toFixed(2).replace('.',',')}</div>
+    <div class="actions">
+      <button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button>
+      <button class="secondary" onclick='photosSoon("${l.id}")'>Fotos</button>
+      <button class="secondary" onclick='calendarSoon("${l.id}")'>Calendário</button>
+    </div>
+  </div>`;
+ }).join('');
 }
-
-if(token){
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("panel").classList.remove("hidden");
-  loadData();
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function newLoft(){
+ document.getElementById('modalTitle').textContent='Novo apartamento';
+ ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ openModal();
 }
+function editLoft(l){
+ document.getElementById('modalTitle').textContent='Editar apartamento';
+ document.getElementById('loftId').value=l.id||'';
+ document.getElementById('name').value=l.name||'';
+ document.getElementById('description').value=l.description||'';
+ document.getElementById('location').value=l.location||'';
+ document.getElementById('maxGuests').value=l.max_guests||2;
+ const p=(data.prices||[]).find(x=>x.loft_id===l.id);
+ document.getElementById('price').value=p?Number(p.price):0;
+ document.getElementById('cleaning').value=l.cleaning_fee??150;
+ document.getElementById('airbnbUrl').value=l.airbnb_url||'';
+ document.getElementById('icalUrl').value='';
+ openModal();
+}
+async function saveLoft(ev){
+ ev.preventDefault();
+ const id=document.getElementById('loftId').value;
+ const body={
+  id:id||null,name:document.getElementById('name').value.trim(),
+  description:document.getElementById('description').value.trim(),
+  location:document.getElementById('location').value.trim(),
+  max_guests:Number(document.getElementById('maxGuests').value||2),
+  cleaning_fee:Number(document.getElementById('cleaning').value||0),
+  airbnb_url:document.getElementById('airbnbUrl').value.trim()
+ };
+ try{
+  const r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});
+  const loftId=r.loft?.id||r.id||id;
+  const price=Number(document.getElementById('price').value||0);
+  if(loftId && price>=0) await api('/admin/price',{method:'POST',body:JSON.stringify({loft_id:loftId,price})});
+  const ical=document.getElementById('icalUrl').value.trim();
+  if(ical && loftId){
+    await api('/admin/channel-calendar',{method:'POST',body:JSON.stringify({loft_id:loftId,channel:'Airbnb',calendar_url:ical})});
+  }
+  closeModal();show(id?'✅ Alterações salvas no banco.':'✅ Apartamento criado e salvo no banco.','ok');await loadData();
+ }catch(e){show('❌ '+e.message,'err','formNotice')}
+}
+function importAirbnb(){
+ document.getElementById('modalTitle').textContent='Importar anúncio do Airbnb';
+ ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('airbnbUrl').focus();
+ document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
+ openModal();
+}
+function photosSoon(){show('A área de fotos será ligada ao Supabase Storage na próxima etapa.','ok')}
+function calendarSoon(){show('O calendário continua sendo gerenciado pela sincronização Airbnb. Vamos integrar o gerenciamento completo pelo painel na próxima etapa.','ok')}
+function logout(){localStorage.removeItem('lofts_prime_admin_token');location.href='admin.html'}
+loadData();
 </script>
-</body>
-</html>
+</body></html>
