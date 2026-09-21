@@ -14,6 +14,8 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
 .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:flex;z-index:35;backdrop-filter:blur(10px)}.bottom button{flex:1;border:0;background:none;padding:10px 4px;font-size:10px;color:var(--green2)}.bottom b{display:block;font-size:16px;margin-bottom:2px}.modal{position:fixed;inset:0;background:#0008;display:none;z-index:50}.modal.on{display:block}.sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:22px 22px 0 0;padding:22px;max-height:85vh;overflow:auto}.lb{position:fixed;inset:0;background:#000e;display:none;z-index:60;align-items:center;justify-content:center}.lb.on{display:flex}.lb img{max-width:90vw;max-height:88vh;object-fit:contain}.lb .x,.lb .l,.lb .r{position:absolute;border:0;background:#fff2;color:#fff;font-size:30px;width:44px;height:44px;border-radius:50%}.lb .x{right:20px;top:20px}.lb .l{left:20px}.lb .r{right:20px}.count{position:absolute;bottom:18px;color:#fff;font-size:12px}
 @media(min-width:800px){.bottom{display:none}.hero{min-height:780px}.detail{padding-left:7vw;padding-right:7vw}.detail>.box{margin-left:auto;margin-right:auto}.city-hero{height:430px}.gallery{grid-template-rows:310px 310px}}
 @media(max-width:799px){header{padding:15px 18px}.logo{font-size:20px}.hero{min-height:700px;padding:120px 18px 32px}.hero h1{font-size:54px}.hero-copy{font-size:15px}.filters .grid{grid-template-columns:1fr 1fr}.filters .field{border-bottom:1px solid var(--line)}.filters .field:nth-child(odd){border-right:1px solid var(--line)}.filters .field:nth-child(even){border-right:0}.filters>.btn{width:100%}.trust{grid-template-columns:1fr}.trust-item{padding:15px 18px}.section{padding:48px 18px 72px}.section-head{display:block}.section-sub{margin-top:8px}.section-rule{margin-bottom:22px}#cards{grid-template-columns:1fr;gap:18px}.cover{height:290px}.detail{padding:95px 18px 90px}.city-hero{height:320px;padding:24px}.city-hero h2{font-size:40px}.gallery{grid-template-rows:150px 150px}.detail-title{font-size:30px}.detail>.box{padding:18px}}
+
+.booking-success{padding:4px 0 2px}.success-icon{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eaf7ef;color:#087443;font-size:28px;font-weight:900;margin-bottom:16px}.success-title{margin:0 0 7px;font-size:26px;letter-spacing:-.03em}.success-sub{margin:0 0 18px;color:#65706a;line-height:1.5}.success-card{border:1px solid #e4e9e5;border-radius:16px;background:#f8faf9;padding:15px 16px;margin:14px 0 18px}.success-card .srow{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #e8ece9;font-size:13px}.success-card .srow:last-child{border-bottom:0}.success-card .srow span{color:#69736e}.success-card .srow strong{text-align:right;color:#1d2924}.success-actions{display:grid;grid-template-columns:1fr;gap:9px}.success-actions .btn.secondary{background:#fff;color:#24332c;border:1px solid #d9e0db}.success-note{font-size:11px;color:#77817c;line-height:1.45;margin-top:13px}
 </style>
 <style>
 /* Lofts Prime — layout desktop */
@@ -93,9 +95,9 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
       <p class="hero-copy">Lofts modernos, bem localizados e preparados para transformar sua estadia em uma experiência especial.</p>
       <div class="filters"><div class="grid">
         <div class="field"><div class="label">Destino</div><select id="city" class="input"><option value="all">Canoas ou Canela</option><option value="Canoas">Canoas</option><option value="Canela">Canela</option></select></div>
-        <div class="field"><div class="label">Hóspedes</div><select class="input"><option>2 hóspedes</option><option>1 hóspede</option></select></div>
-        <div class="field"><div class="label">Check-in</div><input class="input" type="date"></div>
-        <div class="field"><div class="label">Check-out</div><input class="input" type="date"></div>
+        <div class="field"><div class="label">Hóspedes</div><select id="guests" class="input"><option value="2">2 hóspedes</option><option value="1">1 hóspede</option></select></div>
+        <div class="field"><div class="label">Check-in</div><input id="searchCheckin" class="input" type="date"></div>
+        <div class="field"><div class="label">Check-out</div><input id="searchCheckout" class="input" type="date"></div>
       </div><button class="btn" onclick="filterProps()">Buscar lofts</button></div>
     </div>
   </section>
@@ -247,10 +249,62 @@ function render(arr){
   </article>`).join('')
 }
 
-function filterProps(){
-  let c=$('city').value;
-  render(c==='all'?P:P.filter(p=>p.city===c));
+let searchRequest=0;
+async function filterProps(){
+  const token=++searchRequest;
+  const c=$('city').value;
+  const guests=Number($('guests')?.value||2);
+  const cin=$('searchCheckin')?.value||'';
+  const cout=$('searchCheckout')?.value||'';
+  let candidates=(c==='all'?P:P.filter(p=>p.city===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
+
+  if((cin && !cout)||(!cin && cout)|| (cin && cout && cout<=cin)){
+    render(candidates);
+    $('cards').innerHTML = `<div class="box" style="margin:0">Escolha um <b>check-in</b> e um <b>check-out</b> válidos para consultar a disponibilidade.</div>`;
+    $('cards').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  if(!cin || !cout){
+    render(candidates);
+    $('cards').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  const button=document.querySelector('.filters .btn');
+  if(button){button.disabled=true;button.textContent='Consultando disponibilidade...';}
+  $('cards').innerHTML = `<div class="box" style="margin:0;text-align:center">Consultando disponibilidade para as datas selecionadas...</div>`;
   $('cards').scrollIntoView({behavior:'smooth'});
+
+  try{
+    const checks=await Promise.all(candidates.map(async p=>{
+      const id=LOFT_UUIDS[p.id];
+      if(!id) return {...p,_searchAvailable:false};
+      try{
+        const r=await fetch(WORKER_URL+'/availability?loft_id='+encodeURIComponent(id)+'&start='+encodeURIComponent(cin)+'&end='+encodeURIComponent(cout),{headers:{'Accept':'application/json'},cache:'no-store'});
+        const raw=await r.text();
+        let data={};
+        try{data=JSON.parse(raw)}catch(_){}
+        return {...p,_searchAvailable:r.ok && data.available!==false};
+      }catch(_){
+        return {...p,_searchAvailable:false};
+      }
+    }));
+    if(token!==searchRequest) return;
+    const available=checks.filter(p=>p._searchAvailable);
+    if(available.length){
+      render(available);
+      const note=document.createElement('div');
+      note.className='small';
+      note.style.cssText='margin:10px 0 0;color:#087443;font-weight:700';
+      note.textContent=`${available.length} loft${available.length===1?'':'s'} disponível${available.length===1?'':'eis'} para o período selecionado.`;
+      $('cards').appendChild(note);
+    }else{
+      $('cards').innerHTML = `<div class="box" style="margin:0;text-align:center"><strong>Nenhum loft disponível para este período.</strong><br><span class="small">Tente outras datas ou outro destino.</span></div>`;
+    }
+  }finally{
+    if(button){button.disabled=false;button.textContent='Buscar lofts';}
+  }
 }
 
 const CITY_SCENES={
@@ -498,9 +552,28 @@ async function submitReservation(){
     const r=await fetch(WORKER_URL+'/reservation',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({loft_id:LOFT_UUIDS[cur.id],check_in:$('cin').value,check_out:$('cout').value,name,email,phone,document,guests_count,notes})});
     const data=await r.json().catch(()=>({error:'Resposta inválida do servidor.'}));
     if(!r.ok || !data.ok) throw new Error(data.error||('HTTP '+r.status));
-    msg.innerHTML='✅ <b>Pré-reserva criada com sucesso!</b><br>Número: '+data.reservation.id+'<br>Pagamento ficará para a próxima etapa.';
-    msg.style.color='#087443';
-    btn.textContent='Reserva registrada';
+    const rid=data.reservation?.id || '—';
+    const checkIn=$('cin').value.split('-').reverse().join('/');
+    const checkOut=$('cout').value.split('-').reverse().join('/');
+    const total=$('tot').textContent;
+    const waText=encodeURIComponent(`Olá! Fiz uma reserva pelo site Lofts Prime. Reserva ${rid}, ${cur.title}, de ${checkIn} a ${checkOut}. Gostaria de receber as orientações para pagamento.`);
+    $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
+      <div class="booking-success">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Pré-reserva recebida!</h2>
+        <p class="success-sub">Seus dados foram registrados e as datas foram verificadas. Agora você pode seguir para o pagamento ou falar conosco pelo WhatsApp.</p>
+        <div class="success-card">
+          <div class="srow"><span>Reserva</span><strong>#${rid}</strong></div>
+          <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
+          <div class="srow"><span>Período</span><strong>${checkIn} → ${checkOut}</strong></div>
+          <div class="srow"><span>Total</span><strong>${total}</strong></div>
+        </div>
+        <div class="success-actions">
+          <button class="btn" onclick="window.open('https://wa.me/5551985189380?text=${waText}','_blank')">Falar pelo WhatsApp</button>
+          <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
+        </div>
+        <div class="success-note">Pagamento online será conectado na próxima etapa. Guarde o número da reserva para atendimento.</div>
+      </div>`;
     btn.disabled=true;
   }catch(e){
     msg.textContent='⚠️ '+String(e.message||e); msg.style.color='#b42318';
