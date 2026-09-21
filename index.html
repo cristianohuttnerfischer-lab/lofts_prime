@@ -537,7 +537,7 @@ function reserve(){
     <select id="r_guests" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;background:#fff"><option value="1">1 hóspede</option><option value="2">2 hóspedes</option></select>
     <textarea id="r_notes" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;min-height:70px" placeholder="Observações (opcional)"></textarea>
     <div id="r_msg" class="small" style="margin-top:10px"></div>
-    <button id="r_btn" class="btn" onclick="submitReservation()">Confirmar reserva</button>`;
+    <button id="r_btn" class="btn" onclick="submitReservation()">Solicitar reserva</button>`;
   $('modal').classList.add('on')
 }
 
@@ -547,37 +547,68 @@ async function submitReservation(){
   const guests_count=Number($('r_guests').value||1), notes=$('r_notes').value.trim();
   if(name.length<3){msg.textContent='Informe o nome completo.';msg.style.color='#b42318';return}
   if(!phone){msg.textContent='Informe o WhatsApp.';msg.style.color='#b42318';return}
-  btn.disabled=true; btn.textContent='Gravando reserva...'; msg.textContent='Verificando disponibilidade e salvando seus dados...'; msg.style.color='#6b746f';
+  btn.disabled=true; btn.textContent='Enviando solicitação...'; msg.textContent='Registrando sua solicitação...'; msg.style.color='#6b746f';
   try{
-    const r=await fetch(WORKER_URL+'/reservation',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({loft_id:LOFT_UUIDS[cur.id],check_in:$('cin').value,check_out:$('cout').value,name,email,phone,document,guests_count,notes})});
+    const checkIn=$('cin').value, checkOut=$('cout').value;
+    const checkInBR=checkIn.split('-').reverse().join('/');
+    const checkOutBR=checkOut.split('-').reverse().join('/');
+    const total=$('tot').textContent;
+    const r=await fetch(WORKER_URL+'/reservation',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        loft_id:LOFT_UUIDS[cur.id],check_in:checkIn,check_out:checkOut,
+        name,email,phone,document,guests_count,notes
+      })
+    });
     const data=await r.json().catch(()=>({error:'Resposta inválida do servidor.'}));
     if(!r.ok || !data.ok) throw new Error(data.error||('HTTP '+r.status));
-    const rid=data.reservation?.id || '—';
-    const checkIn=$('cin').value.split('-').reverse().join('/');
-    const checkOut=$('cout').value.split('-').reverse().join('/');
-    const total=$('tot').textContent;
-    const waText=encodeURIComponent(`Olá! Fiz uma reserva pelo site Lofts Prime. Reserva ${rid}, ${cur.title}, de ${checkIn} a ${checkOut}. Gostaria de receber as orientações para pagamento.`);
+    const rid=data.reservation_id || data.reservation?.id || '—';
+    const waMessage=
+      `Olá! Quero solicitar uma reserva no Lofts Prime.%0A%0A`+
+      `Reserva: ${rid}%0A`+
+      `Loft: ${cur.title}%0A`+
+      `Cidade: ${cur.city}%0A`+
+      `Check-in: ${checkInBR}%0A`+
+      `Check-out: ${checkOutBR}%0A`+
+      `Hóspedes: ${guests_count}%0A`+
+      `Nome: ${name}%0A`+
+      `E-mail: ${email||'Não informado'}%0A`+
+      `WhatsApp: ${phone}%0A`+
+      `CPF: ${document||'Não informado'}%0A`+
+      `Observações: ${notes||'Nenhuma'}%0A`+
+      `Valor total: ${total}%0A%0A`+
+      `Aguardo as orientações para pagamento por Pix ou link Nubank PJ.`;
+    const waUrl='https://wa.me/5551985189380?text='+encodeURIComponent(
+      `Olá! Quero solicitar uma reserva no Lofts Prime.\n\n`+
+      `Reserva: ${rid}\nLoft: ${cur.title}\nCidade: ${cur.city}\n`+
+      `Check-in: ${checkInBR}\nCheck-out: ${checkOutBR}\nHóspedes: ${guests_count}\n`+
+      `Nome: ${name}\nE-mail: ${email||'Não informado'}\nWhatsApp: ${phone}\n`+
+      `CPF: ${document||'Não informado'}\nObservações: ${notes||'Nenhuma'}\n`+
+      `Valor total: ${total}\n\n`+
+      `Aguardo as orientações para pagamento por Pix ou link Nubank PJ.`
+    );
     $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
       <div class="booking-success">
         <div class="success-icon">✓</div>
-        <h2 class="success-title">Pré-reserva recebida!</h2>
-        <p class="success-sub">Seus dados foram registrados e as datas foram verificadas. Agora você pode seguir para o pagamento ou falar conosco pelo WhatsApp.</p>
+        <h2 class="success-title">Solicitação enviada!</h2>
+        <p class="success-sub">Sua solicitação foi registrada como <b>pendente</b>. As datas ainda não foram bloqueadas. Enviaremos todos os dados pelo WhatsApp para combinar o pagamento.</p>
         <div class="success-card">
-          <div class="srow"><span>Reserva</span><strong>#${rid}</strong></div>
+          <div class="srow"><span>Solicitação</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
-          <div class="srow"><span>Período</span><strong>${checkIn} → ${checkOut}</strong></div>
+          <div class="srow"><span>Período</span><strong>${checkInBR} → ${checkOutBR}</strong></div>
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
         </div>
         <div class="success-actions">
-          <button class="btn" onclick="window.open('https://wa.me/5551985189380?text=${waText}','_blank')">Falar pelo WhatsApp</button>
+          <button class="btn" onclick="window.open('${waUrl}','_blank')">Enviar dados pelo WhatsApp</button>
           <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
         </div>
-        <div class="success-note">Pagamento online será conectado na próxima etapa. Guarde o número da reserva para atendimento.</div>
+        <div class="success-note">A reserva só será confirmada e as datas bloqueadas depois que você receber o pagamento e confirmar no painel administrativo.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
     msg.textContent='⚠️ '+String(e.message||e); msg.style.color='#b42318';
-    btn.disabled=false; btn.textContent='Confirmar reserva';
+    btn.disabled=false; btn.textContent='Solicitar reserva';
   }
 }
 
