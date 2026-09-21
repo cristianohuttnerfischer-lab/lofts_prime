@@ -256,7 +256,7 @@ async function filterProps(){
   const guests=Number($('guests')?.value||2);
   const cin=$('searchCheckin')?.value||'';
   const cout=$('searchCheckout')?.value||'';
-  let candidates=(c==='all'?P:P.filter(p=>p.city===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
+  let candidates=(c==='all'?P:P.filter(p=>cityKey(p.city)===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
 
   if((cin && !cout)||(!cin && cout)|| (cin && cout && cout<=cin)){
     render(candidates);
