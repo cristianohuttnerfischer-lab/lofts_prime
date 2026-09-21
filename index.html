@@ -257,7 +257,7 @@ async function filterProps(){
   const guests=Number($('guests')?.value||2);
   const cin=$('searchCheckin')?.value||'';
   const cout=$('searchCheckout')?.value||'';
-  let candidates=(c==='all'?P:P.filter(p=>p.city===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
+  let candidates=(c==='all'?P:P.filter(p=>cityKey(p.city)===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
 
   if((cin && !cout)||(!cin && cout)|| (cin && cout && cout<=cin)){
     render(candidates);
@@ -536,6 +536,15 @@ function reserve(){
     <input id="r_phone" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px" placeholder="WhatsApp">
     <input id="r_doc" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px" placeholder="CPF">
     <select id="r_guests" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;background:#fff"><option value="1">1 hóspede</option><option value="2">2 hóspedes</option></select>
+    <select id="r_payment" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;background:#fff">
+      <option value="pix">Forma de pagamento: Pix</option>
+      <option value="credit_cash">Cartão de crédito à vista</option>
+      <option value="credit_2x">Cartão de crédito em 2x com juros</option>
+      <option value="credit_3x">Cartão de crédito em 3x com juros</option>
+      <option value="credit_4x">Cartão de crédito em 4x com juros</option>
+      <option value="credit_5x">Cartão de crédito em 5x com juros</option>
+      <option value="credit_6x">Cartão de crédito em 6x com juros</option>
+    </select>
     <textarea id="r_notes" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;min-height:70px" placeholder="Observações (opcional)"></textarea>
     <div id="r_msg" class="small" style="margin-top:10px"></div>
     <button id="r_btn" class="btn" onclick="submitReservation()">Confirmar reserva</button>`;
@@ -545,7 +554,10 @@ function reserve(){
 async function submitReservation(){
   const btn=$('r_btn'), msg=$('r_msg');
   const name=$('r_name').value.trim(), email=$('r_email').value.trim(), phone=$('r_phone').value.trim(), document=$('r_doc').value.trim();
-  const guests_count=Number($('r_guests').value||1), notes=$('r_notes').value.trim();
+  const guests_count=Number($('r_guests').value||1), paymentPreference=$('r_payment').value, notesUser=$('r_notes').value.trim();
+  const paymentLabels={pix:'Pix',credit_cash:'Cartão de crédito à vista',credit_2x:'Cartão de crédito em 2x com juros',credit_3x:'Cartão de crédito em 3x com juros',credit_4x:'Cartão de crédito em 4x com juros',credit_5x:'Cartão de crédito em 5x com juros',credit_6x:'Cartão de crédito em 6x com juros'};
+  const paymentLabel=paymentLabels[paymentPreference]||'Pix';
+  const notes=`Forma de pagamento escolhida: ${paymentLabel}${notesUser?'\nObservações: '+notesUser:''}`;
   if(name.length<3){msg.textContent='Informe o nome completo.';msg.style.color='#b42318';return}
   if(!phone){msg.textContent='Informe o WhatsApp.';msg.style.color='#b42318';return}
   btn.disabled=true; btn.textContent='Gravando reserva...'; msg.textContent='Verificando disponibilidade e salvando seus dados...'; msg.style.color='#6b746f';
@@ -553,27 +565,27 @@ async function submitReservation(){
     const r=await fetch(WORKER_URL+'/reservation',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({loft_id:LOFT_UUIDS[cur.id],check_in:$('cin').value,check_out:$('cout').value,name,email,phone,document,guests_count,notes})});
     const data=await r.json().catch(()=>({error:'Resposta inválida do servidor.'}));
     if(!r.ok || !data.ok) throw new Error(data.error||('HTTP '+r.status));
-    const rid=data.reservation?.id || '—';
+    const rid=data.reservation_id || data.reservation?.id || '—';
     const checkIn=$('cin').value.split('-').reverse().join('/');
     const checkOut=$('cout').value.split('-').reverse().join('/');
     const total=$('tot').textContent;
-    const waText=encodeURIComponent(`Olá! Fiz uma reserva pelo site Lofts Prime. Reserva ${rid}, ${cur.title}, de ${checkIn} a ${checkOut}. Gostaria de receber as orientações para pagamento.`);
+    const waText=encodeURIComponent(`Olá! Quero solicitar uma reserva no Lofts Prime.\n\nReserva: ${rid}\nLoft: ${cur.title}\nCidade: ${cur.city || ''} - RS\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nHóspedes: ${guests_count}\nNome: ${name}\nE-mail: ${email || 'Não informado'}\nWhatsApp: ${phone}\nCPF: ${document || 'Não informado'}\nObservações: ${notesUser || 'Nenhuma'}\nValor total: ${total}\nForma de pagamento escolhida: ${paymentLabel}\n\nAguardo orientações para pagamento. O link de pagamento será enviado em breve.`);
     $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
       <div class="booking-success">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Pré-reserva recebida!</h2>
-        <p class="success-sub">Seus dados foram registrados e as datas foram verificadas. Agora você pode seguir para o pagamento ou falar conosco pelo WhatsApp.</p>
+        <p class="success-sub"><strong>Para concluir a solicitação, envie a mensagem pelo WhatsApp.</strong><br>Depois do envio, aguarde as orientações para pagamento. O link de pagamento será enviado em breve.</p>
         <div class="success-card">
           <div class="srow"><span>Reserva</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
           <div class="srow"><span>Período</span><strong>${checkIn} → ${checkOut}</strong></div>
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
+          <div class="srow"><span>Pagamento</span><strong>${paymentLabel}</strong></div>
         </div>
         <div class="success-actions">
-          <button class="btn" onclick="window.open('https://wa.me/5551985189380?text=${waText}','_blank')">Falar pelo WhatsApp</button>
-          <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
+          <button class="btn" onclick="window.location.href='https://wa.me/5551985189380?text=${waText}'">📲 Enviar solicitação pelo WhatsApp</button>
         </div>
-        <div class="success-note">Pagamento online será conectado na próxima etapa. Guarde o número da reserva para atendimento.</div>
+        <div class="success-note">O envio pelo WhatsApp é necessário para avisarmos sobre a solicitação. Guarde o número da reserva para atendimento.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
