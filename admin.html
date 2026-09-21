@@ -233,6 +233,11 @@ async function showReservations(){
  }catch(e){show('❌ '+e.message,'err')}
 }
 
+function extractPaymentPreference(notes){
+ const m=String(notes||'').match(/Forma de pagamento escolhida:\s*([^\n]+)/i);
+ return m ? m[1].trim() : '';
+}
+
 function renderReservation(r){
  const guest=r.guests||{};
  const loft=r.lofts||{};
@@ -255,12 +260,12 @@ function renderReservation(r){
     <div><b>E-mail:</b> ${esc(guest.email||'')}</div>
     <div><b>CPF:</b> ${esc(guest.document||'')}</div>
     <div><b>Hóspedes:</b> ${esc(r.guests_count||'')}</div>
-    <div><b>Pagamento:</b> ${esc(method||'Aguardando')}</div>
+    <div><b>Pagamento:</b> ${esc(method||extractPaymentPreference(r.notes)||'Aguardando')}</div>
    </div>
    ${r.notes?`<div class="muted" style="margin-top:8px"><b>Observações:</b> ${esc(r.notes)}</div>`:''}
    ${status==='pending'?`<div class="actions">
      <button class="primary" onclick="confirmReservation('${r.id}','pix')">✓ Confirmar — Pix</button>
-     <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Nubank</button>
+     <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Crédito/Nubank</button>
      <button class="danger" onclick="rejectReservation('${r.id}')">Recusar</button>
    </div>`:''}
  </div>`;
