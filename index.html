@@ -94,6 +94,12 @@ const LOFT_UUIDS={
   canela:'bd2b361a-e6ea-4a2f-94f6-dab7ec9f793d'
 };
 
+P.find(x=>x.id==='canoas1').amenities=['garage','pool','gym','wifi','self_checkin'];
+P.find(x=>x.id==='canoas2').amenities=['pool','gym','wifi','self_checkin'];
+P.find(x=>x.id==='canela').amenities=['garage','wifi','self_checkin','air_conditioning','heating','kitchen','hot_water'];
+const AMENITY_LABELS={garage:'🚗 Garagem',pool:'🏊 Piscina',gym:'🏋️ Academia',wifi:'📶 Wi‑Fi',self_checkin:'🔑 Self check-in',air_conditioning:'❄️ Ar-condicionado',heating:'🔥 Aquecimento',kitchen:'🍳 Cozinha',washing_machine:'🧺 Máquina de lavar',tv:'📺 TV',hot_water:'🚿 Água quente',elevator:'🛗 Elevador'};
+function amenityHtml(list,limit=99){return (Array.isArray(list)?list:[]).slice(0,limit).map(x=>`<span class="tag">${AMENITY_LABELS[x]||x}</span>`).join('')}
+
 function normalizePublicData(raw){
   const d=(raw && raw.data && typeof raw.data==='object' && !Array.isArray(raw.data)) ? raw.data : (raw||{});
   return {
@@ -137,6 +143,8 @@ async function loadPublicData(){
         rate:Number(priceMap[dbId] ?? base.rate ?? 0),
         active:db.active!==false,
         airbnb_url:db.airbnb_url ?? base.airbnb_url ?? '',
+        images:Array.isArray(db.photos) && db.photos.length ? db.photos : base.images,
+        amenities:Array.isArray(db.amenities) ? db.amenities : (base.amenities||[]),
         dailyPrices:daily
       };
     });
@@ -146,7 +154,15 @@ async function loadPublicData(){
 
     if(cur){
       const updated=P.find(x=>x.id===cur.id || x.dbId===cur.dbId);
-      if(updated) cur=updated;
+      if(updated){
+        cur=updated;
+        $('dt').textContent=cur.title;
+        $('dm').textContent=`📍 ${cur.city} • até ${cur.max_guests||2} hóspedes`;
+        $('dd').textContent=cur.description;
+        $('tags').innerHTML=amenityHtml(cur.amenities,99);
+        const im=cur.images&&cur.images.length?cur.images:[''];
+        $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
+      }
     }
   }catch(e){
     console.warn('Falha ao carregar dados públicos do Worker:',e);
@@ -186,8 +202,8 @@ function render(arr){
     </div>
     <div class="body">
       <div class="title">${p.title}</div>
-      <div class="meta">📍 ${p.city} • até 2 hóspedes</div>
-      <div class="chips">${p.garage?'🚗 Garagem • ':''}🏊 Piscina • 📶 Wi‑Fi • 🔑 Self check-in</div>
+      <div class="meta">📍 ${p.city} • até ${p.max_guests||2} hóspedes</div>
+      <div class="chips">${amenityHtml(p.amenities,4)}</div>
       <div class="actions">
         <button class="outline" onclick="openP('${p.id}')">Ver fotos</button>
         <button class="primary" onclick="openP('${p.id}')">Reservar</button>
@@ -210,7 +226,7 @@ function openP(id){
   $('dt').textContent=cur.title;
   $('dm').textContent=`📍 ${cur.city} • até ${cur.max_guests||2} hóspedes`;
   $('dd').textContent=cur.description;
-  $('tags').innerHTML=(cur.garage?'<span class="tag">🚗 Garagem</span>':'')+'<span class="tag">🏊 Piscina</span><span class="tag">📶 Wi‑Fi</span><span class="tag">🔑 Self check-in</span>';
+  $('tags').innerHTML=amenityHtml(cur.amenities,99);
   let im=cur.images&&cur.images.length?cur.images:[''];
   $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
   let a=new Date(),b=new Date(a);
@@ -219,6 +235,7 @@ function openP(id){
   $('cout').value=b.toISOString().slice(0,10);
   calc();
   loadCalendar();
+  loadPublicData();
 }
 
 let blockedRanges=[];
