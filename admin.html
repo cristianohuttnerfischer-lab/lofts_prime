@@ -34,6 +34,8 @@ textarea{min-height:90px;resize:vertical}
 @media(max-width:700px){.reservation-grid{grid-template-columns:1fr}}
 
 
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
+
 .login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
 </style>
 </head>
@@ -87,6 +89,22 @@ textarea{min-height:90px;resize:vertical}
   </form>
  </div>
 </div>
+
+<div id="photoModal" class="modal"><div class="box">
+ <h2>Fotos do apartamento</h2><div id="photoNotice" class="notice"></div>
+ <label>Adicionar foto</label><input id="photoFile" type="file" accept="image/*">
+ <div class="actions"><button class="primary" onclick="uploadPhoto()">⬆ Enviar foto</button><button class="secondary" onclick="closePhotoModal()">Fechar</button></div>
+ <div id="photoGrid" class="photo-grid"></div>
+</div></div>
+
+<div id="calendarModal" class="modal"><div class="box">
+ <h2 id="calendarModalTitle">Calendário</h2><div id="calendarNotice" class="notice"></div>
+ <div class="calendar-head"><button class="secondary" onclick="changeCalendarMonth(-1)">‹</button><div id="calendarTitle" class="calendar-title"></div><button class="secondary" onclick="changeCalendarMonth(1)">›</button></div>
+ <div class="calendar-grid" id="calendarGrid"></div>
+ <div class="calendar-legend"><span><i class="dot free"></i>Disponível</span><span><i class="dot block"></i>Bloqueado</span><span><i class="dot price"></i>Preço especial</span></div>
+ <p class="muted">Toque em uma data disponível para cadastrar/alterar o preço daquela diária. Deixe em branco para usar a diária padrão.</p>
+ <div class="actions"><button class="secondary" onclick="closeCalendarModal()">Fechar</button></div>
+</div></div>
 
 <script>
 const WORKER='https://lofts-prime-sync.cristianohuttnerfischer.workers.dev';
@@ -152,8 +170,8 @@ function render(){
     <div class="muted">Até ${l.max_guests||2} hóspedes · Limpeza R$ ${Number(l.cleaning_fee??150).toFixed(2).replace('.',',')}</div>
     <div class="actions">
       <button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button>
-      <button class="secondary" onclick='photosSoon("${l.id}")'>Fotos</button>
-      <button class="secondary" onclick='calendarSoon("${l.id}")'>Calendário</button>
+      <button class="secondary" onclick='openPhotos("${l.id}")'>Fotos</button>
+      <button class="secondary" onclick='openCalendar("${l.id}")'>Calendário</button>
     </div>
   </div>`;
  }).join('');
@@ -196,7 +214,7 @@ async function saveLoft(ev){
   const r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});
   const loftId=r.loft?.id||r.id||id;
   const price=Number(document.getElementById('price').value||0);
-  if(id && loftId && Number.isFinite(price) && price>=0)
+  if(loftId && Number.isFinite(price) && price>=0)
     await api('/admin/price',{method:'POST',body:JSON.stringify({loft_id:loftId,nightly_price:price})});
   const ical=document.getElementById('icalUrl').value.trim();
   if(ical && loftId){
@@ -213,8 +231,88 @@ function importAirbnb(){
  show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
  openModal();
 }
-function photosSoon(){show('A área de fotos será ligada ao Supabase Storage na próxima etapa.','ok')}
-function calendarSoon(){show('O calendário continua sendo gerenciado pela sincronização Airbnb. Vamos integrar o gerenciamento completo pelo painel na próxima etapa.','ok')}
+let photoLoftId='';
+function openPhotos(id){
+ photoLoftId=id;
+ const loft=(data.lofts||[]).find(x=>x.id===id);
+ document.getElementById('photoFile').value='';
+ renderPhotos(loft?.photos||[]);
+ document.getElementById('photoModal').classList.add('open');
+}
+function closePhotoModal(){document.getElementById('photoModal').classList.remove('open')}
+function renderPhotos(photos){
+ const arr=Array.isArray(photos)?photos:[];
+ document.getElementById('photoGrid').innerHTML=arr.length?arr.map((url,i)=>`<div class="photo-item"><img src="${esc(url)}" alt="Foto ${i+1}"><button onclick='deletePhoto(${JSON.stringify(url)})'>Excluir</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Nenhuma foto cadastrada.</div>';
+}
+async function uploadPhoto(){
+ const file=document.getElementById('photoFile').files[0];
+ if(!file){show('Selecione uma foto.','err','photoNotice');return}
+ try{
+  const fd=new FormData();fd.append('loft_id',photoLoftId);fd.append('file',file);
+  const r=await fetch(WORKER+'/admin/photo',{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+  const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
+  if(!r.ok||j.ok===false)throw new Error(j.error||('HTTP '+r.status));
+  const loft=(data.lofts||[]).find(x=>x.id===photoLoftId);if(loft)loft.photos=j.photos||[];
+  renderPhotos(j.photos||[]);render();show('✅ Foto adicionada.','ok','photoNotice');
+ }catch(e){show('❌ '+e.message,'err','photoNotice')}
+}
+async function deletePhoto(url){
+ if(!confirm('Excluir esta foto?'))return;
+ try{const j=await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:photoLoftId,url})});const loft=(data.lofts||[]).find(x=>x.id===photoLoftId);if(loft)loft.photos=j.photos||[];renderPhotos(j.photos||[]);render();}catch(e){show('❌ '+e.message,'err','photoNotice')}
+}
+
+let calendarLoftId='';let calendarMonth=new Date();
+let calendarBlocked=[];
+function openCalendar(id){calendarLoftId=id;calendarMonth=new Date();document.getElementById('calendarModal').classList.add('open');loadAdminCalendar();}
+function closeCalendarModal(){document.getElementById('calendarModal').classList.remove('open')}
+function changeCalendarMonth(delta){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+delta,1);loadAdminCalendar()}
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function formatBRDate(k){return k.split('-').reverse().join('/')}
+async function loadAdminCalendar(){
+ const loft=(data.lofts||[]).find(x=>x.id===calendarLoftId);
+ document.getElementById('calendarModalTitle').textContent='Calendário — '+(loft?.name||'Loft');
+ document.getElementById('calendarTitle').textContent=calendarMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
+ const start=new Date(y,m,1);const end=new Date(y,m+1,1);
+ calendarBlocked=[];
+ try{
+  const r=await fetch(WORKER+'/availability?loft_id='+encodeURIComponent(calendarLoftId)+'&start='+dateKey(start)+'&end='+dateKey(end),{cache:'no-store'});
+  const j=await r.json();if(r.ok&&j.ok)calendarBlocked=j.blocked||[];
+ }catch{}
+ renderAdminCalendar();
+}
+function isBlockedAdmin(k){return calendarBlocked.some(x=>x.start_date&&x.end_date&&k>=x.start_date&&k<x.end_date)}
+function dailyPriceFor(k){const x=(data.daily_prices||[]).find(p=>p.loft_id===calendarLoftId&&p.date===k);return x?Number(x.price):null}
+function renderAdminCalendar(){
+ const grid=document.getElementById('calendarGrid');
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
+ const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+ let html=names.map(n=>`<div class="calendar-dow">${n}</div>`).join('');
+ const first=new Date(y,m,1).getDay();const days=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++)html+='<div></div>';
+ for(let d=1;d<=days;d++){
+  const dt=new Date(y,m,d);const k=dateKey(dt);const blocked=isBlockedAdmin(k);const dp=dailyPriceFor(k);
+  html+=`<div class="day ${blocked?'blocked':''} ${dp!==null?'has-price':''}" ${blocked?'title="Bloqueado"':'onclick="editDailyPrice(\''+k+'\')"'}><div class="day-num">${d}</div><div class="day-price">${dp!==null?'R$ '+dp.toFixed(0):''}</div></div>`;
+ }
+ grid.innerHTML=html;
+}
+async function editDailyPrice(k){
+ if(isBlockedAdmin(k)){show('Esta data está bloqueada e não pode receber preço especial.','err','calendarNotice');return}
+ const current=dailyPriceFor(k);
+ const loft=(data.lofts||[]).find(x=>x.id===calendarLoftId);
+ const base=(data.prices||[]).find(x=>x.loft_id===calendarLoftId);
+ const value=prompt('Preço da diária em '+formatBRDate(k)+' (deixe vazio para remover o preço especial):',current!==null?String(current):String(base?.nightly_price??0));
+ if(value===null)return;
+ try{
+  if(value.trim()===''){
+   await api('/admin/daily-price?loft_id='+encodeURIComponent(calendarLoftId)+'&date='+encodeURIComponent(k),{method:'DELETE'});
+  }else{
+   const price=Number(value.replace(',','.'));if(!Number.isFinite(price)||price<0)throw new Error('Preço inválido.');
+   await api('/admin/daily-price',{method:'POST',body:JSON.stringify({loft_id:calendarLoftId,date:k,price})});
+  }
+  const j=await api('/admin/data');data=j;render();await loadAdminCalendar();show('✅ Calendário atualizado.','ok','calendarNotice');
+ }catch(e){show('❌ '+e.message,'err','calendarNotice')}
+}
 
 async function showReservations(){
  try{
@@ -237,7 +335,7 @@ function renderReservation(r){
  const guest=r.guests||{};
  const loft=r.lofts||{};
  const status=r.status||'pending';
- const statusLabel={pending:'Pendente',confirmed:'Confirmada',rejected:'Recusada',cancelled:'Cancelada'}[status]||status;
+ const statusLabel={pending:'Pendente',confirmed:'Confirmada',rejected:'Recusada',cancelled:'Recusada'}[status]||status;
  const method=r.payment_method||'';
  const total=Number(r.total_amount||0).toFixed(2).replace('.',',');
  const ci=r.check_in?String(r.check_in).split('-').reverse().join('/'):''; 
@@ -258,18 +356,19 @@ function renderReservation(r){
     <div><b>Pagamento:</b> ${esc(method||'Aguardando')}</div>
    </div>
    ${r.notes?`<div class="muted" style="margin-top:8px"><b>Observações:</b> ${esc(r.notes)}</div>`:''}
+   ${guest.phone?`<div class="actions"><button class="secondary" onclick='openGuestWhatsApp(${JSON.stringify(guest.phone)},${JSON.stringify(r.id)},${JSON.stringify(loft.name||'Loft')})'>💬 WhatsApp do hóspede</button></div>`:''}
    ${status==='pending'?`<div class="actions">
      <button class="primary" onclick="confirmReservation('${r.id}','pix')">✓ Confirmar — Pix</button>
      <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Nubank</button>
      <button class="danger" onclick="rejectReservation('${r.id}')">Recusar</button>
-   </div>`:''}
+   </div>`:status==='confirmed'?`<div class="actions"><button class="danger" onclick="deleteReservation('${r.id}')">Excluir reserva</button></div>`:status==='cancelled'||status==='rejected'?`<div class="actions"><button class="danger" onclick="deleteReservation('${r.id}')">Excluir registro</button></div>`:''}
  </div>`;
 }
 
 async function confirmReservation(id,method){
  if(!confirm('Confirma que o pagamento foi recebido e deseja bloquear estas datas?')) return;
  try{
-  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'confirmed',payment_method:method})});
+  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({id,status:'confirmed',payment_method:method})});
   show('✅ Reserva confirmada. As datas agora ficam bloqueadas.','ok');
   await showReservations();
  }catch(e){show('❌ '+e.message,'err')}
@@ -278,10 +377,23 @@ async function confirmReservation(id,method){
 async function rejectReservation(id){
  if(!confirm('Recusar esta solicitação? As datas continuarão disponíveis.')) return;
  try{
-  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'rejected'})});
+  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({id,status:'rejected'})});
   show('Solicitação recusada.','ok');
   await showReservations();
  }catch(e){show('❌ '+e.message,'err')}
+}
+
+async function deleteReservation(id){
+ if(!confirm('Excluir definitivamente esta reserva do banco de dados?')) return;
+ try{await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});show('Reserva excluída.','ok');await showReservations();}
+ catch(e){show('❌ '+e.message,'err')}
+}
+
+function openGuestWhatsApp(phone,id,loft){
+ const digits=String(phone||'').replace(/\D/g,'');
+ if(!digits)return;
+ const msg=`Olá! Sobre a solicitação de reserva ${id} do ${loft}. Vou lhe orientar sobre o pagamento.`;
+ window.open('https://wa.me/55'+digits+'?text='+encodeURIComponent(msg),'_blank');
 }
 
 function logout(){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();document.getElementById('status').textContent='Aguardando login';}
