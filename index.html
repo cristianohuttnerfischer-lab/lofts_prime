@@ -569,7 +569,7 @@ async function submitReservation(){
     const checkIn=$('cin').value.split('-').reverse().join('/');
     const checkOut=$('cout').value.split('-').reverse().join('/');
     const total=$('tot').textContent;
-    const waText=encodeURIComponent(`Olá! Quero solicitar uma reserva no Lofts Prime.\n\nReserva: ${rid}\nLoft: ${cur.title}\nCidade: ${cur.city || ''} - RS\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nHóspedes: ${guests_count}\nNome: ${name}\nE-mail: ${email || 'Não informado'}\nWhatsApp: ${phone}\nCPF: ${document || 'Não informado'}\nObservações: ${notesUser || 'Nenhuma'}\nValor total: ${total}\nForma de pagamento escolhida: ${paymentLabel}\n\nAguardo orientações para pagamento. O link de pagamento será enviado em breve.`);
+    const waText=encodeURIComponent(`Olá! Quero solicitar uma reserva no Lofts Prime.\n\nReserva: ${rid}\nLoft: ${cur.title}\nCidade: ${cur.city || ''} - RS\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nHóspedes: ${guests_count}\nNome: ${name}\nE-mail: ${email || 'Não informado'}\nWhatsApp: ${phone}\nCPF: ${document || 'Não informado'}\nObservações: ${notesUser || 'Nenhuma'}\nValor total: ${total}\nForma de pagamento escolhida: ${paymentLabel}\n\nAguardo orientações para pagamento.`);
     $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
       <div class="booking-success">
         <div class="success-icon">✓</div>
