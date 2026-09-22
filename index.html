@@ -144,6 +144,20 @@ function normalizePublicData(raw){
   };
 }
 
+function publicImageUrl(url){
+  const u=String(url||'').trim();
+  if(!u) return '';
+  try{
+    const x=new URL(u);
+    const h=x.hostname.toLowerCase();
+    // Fotos salvas pelo painel/Supabase e fotos do Airbnb passam pelo Worker.
+    // Imagens estáticas já existentes em outros domínios continuam diretas.
+    if(h.endsWith('.supabase.co') || h.endsWith('.muscache.com') || h==='a0.muscache.com' || h==='a1.muscache.com' || h==='a2.muscache.com' || h==='a3.muscache.com')
+      return `${WORKER_URL}/public/photo?url=${encodeURIComponent(u)}`;
+  }catch{}
+  return u;
+}
+
 async function loadPublicData(){
   try{
     const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{
@@ -170,7 +184,7 @@ async function loadPublicData(){
         rate:Number(priceMap[db.id] ?? base.rate ?? 0),
         active:true,
         airbnb_url:db.airbnb_url ?? base.airbnb_url ?? '',
-        images:Array.isArray(db.photos)&&db.photos.length?db.photos:(base.images||[]),
+        images:(Array.isArray(db.photos)&&db.photos.length?db.photos:(base.images||[])).map(publicImageUrl).filter(Boolean),
         amenities:Array.isArray(db.amenities)&&db.amenities.length?db.amenities:(base.amenities||[]),
         dailyPrices:daily
       };
@@ -184,7 +198,9 @@ async function loadPublicData(){
     }
   }catch(e){
     console.error(e);
-    render(P.filter(p=>p.active!==false));
+    P=[];
+    render([]);
+    $('cards').innerHTML='<div class="box" style="margin:0">Não foi possível carregar os lofts agora. Atualize a página para tentar novamente.</div>';
   }
 }
 function render(arr){
@@ -211,7 +227,7 @@ async function filterProps(){
   const guests=Number($('guests')?.value||2);
   const cin=$('searchCheckin')?.value||'';
   const cout=$('searchCheckout')?.value||'';
-  let candidates=(c==='all'?P:P.filter(p=>p.city===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
+  let candidates=(c==='all'?P:P.filter(p=>cityKey(p.city)===cityKey(c))).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
 
   if((cin && !cout)||(!cin && cout)|| (cin && cout && cout<=cin)){
     render(candidates);
