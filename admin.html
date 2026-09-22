@@ -22,7 +22,7 @@ label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#4754
 input,textarea,select{width:100%;padding:11px;border:1px solid #d5dae2;border-radius:9px;font:inherit}
 textarea{min-height:90px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}.badge.rejected,.badge.cancelled{background:#fef2f2;color:#b42318}
 .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
 .modal.open{display:flex}.box{background:#fff;border-radius:18px;width:min(700px,100%);max-height:92vh;overflow:auto;padding:22px}
 .notice{padding:11px 13px;border-radius:10px;margin-bottom:12px;font-size:13px;display:none}.ok{background:#ecfdf3;color:#087443}.err{background:#fef2f2;color:#b42318}
@@ -393,7 +393,7 @@ function renderReservation(r){
  const co=r.check_out?String(r.check_out).split('-').reverse().join('/'):'';
  return `<div class="reservation ${esc(status)}">
    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-    <div><b>#${esc(r.id||'')}</b> · <span class="badge">${esc(statusLabel)}</span></div>
+    <div><b>#${esc(r.id||'')}</b> · <span class="badge ${esc(status)}">${esc(statusLabel)}</span></div>
     <b>R$ ${total}</b>
    </div>
    <div class="reservation-grid" style="margin-top:10px">
@@ -415,6 +415,9 @@ function renderReservation(r){
    ${status==='confirmed'?`<div class="actions">
      <button class="danger" onclick="deleteReservation('${r.id}')">🗑 Excluir reserva</button>
    </div>`:''}
+   ${(status==='rejected'||status==='cancelled')?`<div class="actions">
+     <button class="danger" onclick="deleteReservationRecord('${r.id}')">🗑 Excluir registro</button>
+   </div>`:''}
  </div>`;
 }
 
@@ -432,6 +435,15 @@ async function deleteReservation(id){
  try{
   await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});
   show('✅ Reserva excluída. As datas foram liberadas.','ok');
+  await showReservations();
+ }catch(e){show('❌ '+e.message,'err')}
+}
+
+async function deleteReservationRecord(id){
+ if(!confirm('Excluir definitivamente este registro cancelado? Esta ação não pode ser desfeita.')) return;
+ try{
+  await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});
+  show('✅ Registro excluído.','ok');
   await showReservations();
  }catch(e){show('❌ '+e.message,'err')}
 }
