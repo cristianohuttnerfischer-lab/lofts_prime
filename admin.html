@@ -89,7 +89,12 @@ textarea{min-height:90px;resize:vertical}
     <div><label>Diária padrão (R$)</label><input id="price" type="number" min="0" step=".01" required></div>
     <div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div>
    </div>
-   <label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/...">
+   <label>Link do anúncio Airbnb</label>
+   <div style="display:flex;gap:8px;align-items:stretch">
+    <input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/..." style="flex:1">
+    <button class="secondary" type="button" id="readAirbnbBtn" onclick="readAirbnb()">🔎 Ler anúncio</button>
+   </div>
+   <div id="airbnbPreview" class="muted" style="margin-top:8px;display:none"></div>
    <label>URL do calendário iCal Airbnb (opcional)</label><input id="icalUrl" placeholder="Cole aqui somente se quiser cadastrar um calendário novo">
    <div class="actions">
     <button class="primary" type="submit">💾 Salvar alterações</button>
@@ -201,10 +206,17 @@ function render(){
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openModal(){document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
+function setAirbnbImportMode(on){
+ const b=document.getElementById('readAirbnbBtn');
+ if(b) b.style.display=on?'inline-block':'none';
+ const p=document.getElementById('airbnbPreview');
+ if(!on && p){p.style.display='none';p.textContent='';}
+}
 function newLoft(){
  document.getElementById('modalTitle').textContent='Novo apartamento';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
  document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ setAirbnbImportMode(false);
  openModal();
 }
 function editLoft(l){
@@ -219,6 +231,7 @@ function editLoft(l){
  document.getElementById('cleaning').value=l.cleaning_fee??150;
  document.getElementById('airbnbUrl').value=l.airbnb_url||'';
  document.getElementById('icalUrl').value='';
+ setAirbnbImportMode(false);
  openModal();
 }
 async function saveLoft(ev){
@@ -248,10 +261,35 @@ async function saveLoft(ev){
 function importAirbnb(){
  document.getElementById('modalTitle').textContent='Importar anúncio do Airbnb';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
- document.getElementById('airbnbUrl').focus();
  document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
- show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
+ setAirbnbImportMode(true);
+ show('Cole o link do anúncio do Airbnb e clique em “Ler anúncio”. O painel tentará trazer nome, descrição, localização e imagem principal. Revise os dados antes de salvar.','ok','formNotice');
  openModal();
+ document.getElementById('airbnbUrl').focus();
+}
+
+async function readAirbnb(){
+ const url=document.getElementById('airbnbUrl').value.trim();
+ if(!url) return show('Cole primeiro o link do anúncio do Airbnb.','err','formNotice');
+ const btn=document.getElementById('readAirbnbBtn');
+ btn.disabled=true; btn.textContent='⏳ Lendo...';
+ try{
+  const r=await api('/admin/import-airbnb',{method:'POST',body:JSON.stringify({url})});
+  const x=r.listing||{};
+  if(x.name) document.getElementById('name').value=x.name;
+  if(x.description) document.getElementById('description').value=x.description;
+  if(x.location) document.getElementById('location').value=x.location;
+  if(x.airbnb_url) document.getElementById('airbnbUrl').value=x.airbnb_url;
+  const imgs=Array.isArray(x.images)?x.images:[];
+  const preview=document.getElementById('airbnbPreview');
+  preview.style.display='block';
+  preview.innerHTML='✅ '+esc(r.message||'Dados encontrados.')+(imgs.length?`<br>📷 ${imgs.length} imagem(ns) encontrada(s). Depois de salvar, use <b>Fotos</b> para cadastrar as imagens no painel.`:'<br>📷 Nenhuma imagem pública foi encontrada automaticamente.');
+  show('Dados do Airbnb carregados. Confira e complete diária, hóspedes, limpeza e calendário antes de salvar.','ok','formNotice');
+ }catch(e){
+  show('❌ '+e.message,'err','formNotice');
+ }finally{
+  btn.disabled=false; btn.textContent='🔎 Ler anúncio';
+ }
 }
 let currentLoftIdForPhotos='';
 let currentLoftIdForCalendar='';
