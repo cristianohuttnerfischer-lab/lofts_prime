@@ -42,8 +42,9 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
   .cover{height:300px}
   .body{padding:16px}
   .title{font-size:18px}
-  .detail{padding:22px 42px 60px;max-width:1200px;margin:auto;position:relative;z-index:1}
+  .detail{padding:92px 42px 60px;max-width:1200px;margin:auto;position:relative;z-index:1}
   .back{display:inline-flex;position:relative;z-index:20;visibility:visible;opacity:1;font-size:14px;padding:8px 12px 16px 0;background:var(--paper);color:var(--green2)}
+  .detail > .back{margin-top:0;min-height:34px;}
   .gallery{grid-template-rows:260px 260px;gap:6px}
   .gallery img:first-child{border-radius:18px 0 0 18px}
   .gallery img:nth-child(2){border-radius:0 18px 0 0}
@@ -144,65 +145,94 @@ function normalizePublicData(raw){
   };
 }
 
-function publicImageUrl(url){
-  const u=String(url||'').trim();
-  if(!u) return '';
-  try{
-    const x=new URL(u);
-    const h=x.hostname.toLowerCase();
-    // Fotos salvas pelo painel/Supabase e fotos do Airbnb passam pelo Worker.
-    // Imagens estáticas já existentes em outros domínios continuam diretas.
-    if(h.endsWith('.supabase.co') || h.endsWith('.muscache.com') || h==='a0.muscache.com' || h==='a1.muscache.com' || h==='a2.muscache.com' || h==='a3.muscache.com')
-      return `${WORKER_URL}/public/photo?url=${encodeURIComponent(u)}`;
-  }catch{}
-  return u;
-}
-
 async function loadPublicData(){
   try{
     const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{
-      method:'GET',cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
     });
     const raw=await r.json();
     if(!r.ok || raw.ok!==true) throw new Error(raw.error||`HTTP ${r.status}`);
     const data=normalizePublicData(raw);
     const priceMap=Object.fromEntries(data.prices.map(x=>[x.loft_id,Number(x.nightly_price ?? x.price ?? 0)]));
-    const baseByDbId=Object.fromEntries(Object.entries(LOFT_UUIDS).map(([localId,dbId])=>[dbId,P.find(x=>x.id===localId)]));
-    const dbLofts=Array.isArray(data.lofts)?data.lofts:[];
-    P=dbLofts.filter(db=>db && db.active!==false).map(db=>{
-      const base=baseByDbId[db.id]||{};
-      const daily=data.daily_prices.filter(x=>x.loft_id===db.id).map(x=>({date:x.date ?? x.price_date ?? x.date_key,price:Number(x.price ?? x.nightly_price ?? 0)}));
+
+    const dbToLocal={};
+    Object.entries(LOFT_UUIDS).forEach(([localId,dbId])=>dbToLocal[dbId]=localId);
+
+    const merged=P.map(base=>{
+      const dbId=LOFT_UUIDS[base.id];
+      const db=data.lofts.find(x=>x.id===dbId);
+      if(!db) return base;
+      const daily=data.daily_prices.filter(x=>x.loft_id===dbId).map(x=>({
+        date:x.date ?? x.price_date ?? x.date_key,
+        price:Number(x.price ?? x.nightly_price ?? 0)
+      }));
       return {
         ...base,
-        id:base.id||`db-${db.id}`,
-        dbId:db.id,
-        title:db.name ?? base.title ?? 'Loft',
-        city:db.location ?? base.city ?? '',
-        description:db.description ?? base.description ?? '',
+        dbId,
+        title:db.name ?? base.title,
+        city:db.location ?? base.city,
+        description:db.description ?? base.description,
         max_guests:Number(db.max_guests ?? base.max_guests ?? 2),
         cleaning:Number(db.cleaning_fee ?? base.cleaning ?? 150),
-        rate:Number(priceMap[db.id] ?? base.rate ?? 0),
-        active:true,
+        rate:Number(priceMap[dbId] ?? base.rate ?? 0),
+        active:db.active!==false,
         airbnb_url:db.airbnb_url ?? base.airbnb_url ?? '',
-        images:(Array.isArray(db.photos)&&db.photos.length?db.photos:(base.images||[])).map(publicImageUrl).filter(Boolean),
-        amenities:Array.isArray(db.amenities)&&db.amenities.length?db.amenities:(base.amenities||[]),
+        images:Array.isArray(db.photos) && db.photos.length ? db.photos : base.images,
+        amenities:Array.isArray(db.amenities) ? db.amenities : (base.amenities||[]),
         dailyPrices:daily
       };
     });
-    if(P.length){
-      $('heroBg').style.backgroundImage=`url("${P[0].images?.[0]||''}")`;
-      render(P);
-    }else{
-      render([]);
-      $('cards').innerHTML='<div class="box" style="margin:0">Nenhum loft disponível no momento.</div>';
+
+    if(merged.length) P=merged;
+    if(P[0]?.images?.[0]) $('heroBg').style.backgroundImage=`url("${P[0].images[0]}")`;
+    render(P);
+
+    if(cur){
+      const updated=P.find(x=>x.id===cur.id || x.dbId===cur.dbId);
+      if(updated){
+        cur=updated;
+        updateCityHero(cur.city);
+        $('dt').textContent=cur.title;
+        $('dm').textContent=`📍 ${cur.city} • até ${cur.max_guests||2} hóspedes`;
+        $('dd').textContent=cur.description;
+        $('tags').innerHTML=amenityHtml(cur.amenities,99);
+        const im=cur.images&&cur.images.length?cur.images:[''];
+        $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
+      }
     }
   }catch(e){
-    console.error(e);
-    P=[];
-    render([]);
-    $('cards').innerHTML='<div class="box" style="margin:0">Não foi possível carregar os lofts agora. Atualize a página para tentar novamente.</div>';
+    console.warn('Falha ao carregar dados públicos do Worker:',e);
   }
 }
+
+let cur=null,pi=0, availabilityRequest=0;
+
+async function supabaseRPC(name, body){
+  const url=SUPABASE_URL+'/rest/v1/rpc/'+name;
+  const r=await fetch(url,{
+    method:'POST',
+    headers:{
+      'apikey':SUPABASE_KEY,
+      'Authorization':'Bearer '+SUPABASE_KEY,
+      'Content-Type':'application/json',
+      'Accept':'application/json'
+    },
+    body:JSON.stringify(body)
+  });
+  const raw=await r.text();
+  if(!r.ok){
+    let detail=raw;
+    try{
+      const j=JSON.parse(raw);
+      detail=j.message || j.error_description || j.hint || raw;
+    }catch(_){}
+    throw new Error('HTTP '+r.status+' — '+detail);
+  }
+  try{return raw?JSON.parse(raw):[];}catch(_){return [];}
+}
+
 function render(arr){
   $('cards').innerHTML=arr.map(p=>`<article class="card">
     <div class="cover" style="background-image:url('${p.images[0]}')">
@@ -227,7 +257,7 @@ async function filterProps(){
   const guests=Number($('guests')?.value||2);
   const cin=$('searchCheckin')?.value||'';
   const cout=$('searchCheckout')?.value||'';
-  let candidates=(c==='all'?P:P.filter(p=>cityKey(p.city)===cityKey(c))).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
+  let candidates=(c==='all'?P:P.filter(p=>cityKey(p.city)===c)).filter(p=>p.active!==false && Number(p.max_guests||2)>=guests);
 
   if((cin && !cout)||(!cin && cout)|| (cin && cout && cout<=cin)){
     render(candidates);
@@ -506,6 +536,15 @@ function reserve(){
     <input id="r_phone" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px" placeholder="WhatsApp">
     <input id="r_doc" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px" placeholder="CPF">
     <select id="r_guests" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;background:#fff"><option value="1">1 hóspede</option><option value="2">2 hóspedes</option></select>
+    <select id="r_payment" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;background:#fff">
+      <option value="pix">Forma de pagamento: Pix</option>
+      <option value="credit_cash">Cartão de crédito à vista</option>
+      <option value="credit_2x">Cartão de crédito em 2x com juros</option>
+      <option value="credit_3x">Cartão de crédito em 3x com juros</option>
+      <option value="credit_4x">Cartão de crédito em 4x com juros</option>
+      <option value="credit_5x">Cartão de crédito em 5x com juros</option>
+      <option value="credit_6x">Cartão de crédito em 6x com juros</option>
+    </select>
     <textarea id="r_notes" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;min-height:70px" placeholder="Observações (opcional)"></textarea>
     <div id="r_msg" class="small" style="margin-top:10px"></div>
     <button id="r_btn" class="btn" onclick="submitReservation()">Confirmar reserva</button>`;
@@ -515,7 +554,10 @@ function reserve(){
 async function submitReservation(){
   const btn=$('r_btn'), msg=$('r_msg');
   const name=$('r_name').value.trim(), email=$('r_email').value.trim(), phone=$('r_phone').value.trim(), document=$('r_doc').value.trim();
-  const guests_count=Number($('r_guests').value||1), notes=$('r_notes').value.trim();
+  const guests_count=Number($('r_guests').value||1), paymentPreference=$('r_payment').value, notesUser=$('r_notes').value.trim();
+  const paymentLabels={pix:'Pix',credit_cash:'Cartão de crédito à vista',credit_2x:'Cartão de crédito em 2x com juros',credit_3x:'Cartão de crédito em 3x com juros',credit_4x:'Cartão de crédito em 4x com juros',credit_5x:'Cartão de crédito em 5x com juros',credit_6x:'Cartão de crédito em 6x com juros'};
+  const paymentLabel=paymentLabels[paymentPreference]||'Pix';
+  const notes=`Forma de pagamento escolhida: ${paymentLabel}${notesUser?'\nObservações: '+notesUser:''}`;
   if(name.length<3){msg.textContent='Informe o nome completo.';msg.style.color='#b42318';return}
   if(!phone){msg.textContent='Informe o WhatsApp.';msg.style.color='#b42318';return}
   btn.disabled=true; btn.textContent='Gravando reserva...'; msg.textContent='Verificando disponibilidade e salvando seus dados...'; msg.style.color='#6b746f';
@@ -523,27 +565,27 @@ async function submitReservation(){
     const r=await fetch(WORKER_URL+'/reservation',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({loft_id:LOFT_UUIDS[cur.id],check_in:$('cin').value,check_out:$('cout').value,name,email,phone,document,guests_count,notes})});
     const data=await r.json().catch(()=>({error:'Resposta inválida do servidor.'}));
     if(!r.ok || !data.ok) throw new Error(data.error||('HTTP '+r.status));
-    const rid=data.reservation?.id || '—';
+    const rid=data.reservation_id || data.reservation?.id || '—';
     const checkIn=$('cin').value.split('-').reverse().join('/');
     const checkOut=$('cout').value.split('-').reverse().join('/');
     const total=$('tot').textContent;
-    const waText=encodeURIComponent(`Olá! Fiz uma reserva pelo site Lofts Prime. Reserva ${rid}, ${cur.title}, de ${checkIn} a ${checkOut}. Gostaria de receber as orientações para pagamento.`);
+    const waText=encodeURIComponent(`Olá! Quero solicitar uma reserva no Lofts Prime.\n\nReserva: ${rid}\nLoft: ${cur.title}\nCidade: ${cur.city || ''} - RS\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nHóspedes: ${guests_count}\nNome: ${name}\nE-mail: ${email || 'Não informado'}\nWhatsApp: ${phone}\nCPF: ${document || 'Não informado'}\nObservações: ${notesUser || 'Nenhuma'}\nValor total: ${total}\nForma de pagamento escolhida: ${paymentLabel}\n\nAguardo orientações para pagamento.`);
     $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
       <div class="booking-success">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Pré-reserva recebida!</h2>
-        <p class="success-sub">Seus dados foram registrados e as datas foram verificadas. Agora você pode seguir para o pagamento ou falar conosco pelo WhatsApp.</p>
+        <p class="success-sub"><strong>Para concluir a solicitação, envie a mensagem pelo WhatsApp.</strong><br>Depois do envio, aguarde as orientações para pagamento. O link de pagamento será enviado em breve.</p>
         <div class="success-card">
           <div class="srow"><span>Reserva</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
           <div class="srow"><span>Período</span><strong>${checkIn} → ${checkOut}</strong></div>
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
+          <div class="srow"><span>Pagamento</span><strong>${paymentLabel}</strong></div>
         </div>
         <div class="success-actions">
-          <button class="btn" onclick="window.open('https://wa.me/5551985189380?text=${waText}','_blank')">Falar pelo WhatsApp</button>
-          <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
+          <button class="btn" onclick="window.location.href='https://wa.me/5551985189380?text=${waText}'">📲 Enviar solicitação pelo WhatsApp</button>
         </div>
-        <div class="success-note">Pagamento online será conectado na próxima etapa. Guarde o número da reserva para atendimento.</div>
+        <div class="success-note">O envio pelo WhatsApp é necessário para avisarmos sobre a solicitação. Guarde o número da reserva para atendimento.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
