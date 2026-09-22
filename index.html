@@ -120,6 +120,7 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
 <div id="lb" class="lb"><button class="x" onclick="closeLB()">✕</button><button class="l" onclick="move(-1)">‹</button><img id="lbi"><button class="r" onclick="move(1)">›</button><div id="count" class="count"></div></div>
 <nav class="bottom"><button onclick="goHome()"><b>⌂</b>Início</button><button onclick="document.getElementById('cards').scrollIntoView({behavior:'smooth'})"><b>⌕</b>Lofts</button><button onclick="reserve()"><b>▣</b>Reservar</button><button onclick="window.open('https://wa.me/5551985189380?text=Ol%C3%A1%21%20Vim%20pelo%20site%20Lofts%20Prime%20e%20gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20uma%20hospedagem.','_blank')"><b>◉</b>WhatsApp</button></nav></div>
 <script>
+const WORKER_URL="https://lofts-prime-sync.cristianohuttnerfischer.workers.dev";
 let P=[];
 
 function publicImageUrl(url){
