@@ -516,7 +516,7 @@ function showPhoto(){$('lbi').src=cur.images[pi];$('count').textContent=`${pi+1}
 function move(d){pi=(pi+d+cur.images.length)%cur.images.length;showPhoto()}
 function closeLB(){$('lb').classList.remove('on')}
 
-async function reserve(){
+function reserve(){
   if(!cur){alert('Abra um loft primeiro.');return}
   const cin=$('cin').value, cout=$('cout').value;
   if(!cin || !cout || cout<=cin){
@@ -524,16 +524,20 @@ async function reserve(){
     return;
   }
 
-  // Não dependemos mais apenas do resultado anterior do calendário.
-  // Ao clicar em “Continuar para reserva”, fazemos uma nova consulta e
-  // só abrimos o formulário quando o servidor confirmar que está livre.
-  const available=await checkAvailability();
-  if(!available){
-    alert('Escolha um período que esteja disponível no calendário.');
-    return;
+  // O calendário já mostra as datas ocupadas. Aqui validamos localmente
+  // apenas para abrir o formulário sem depender de uma segunda consulta
+  // assíncrona que pode chegar depois e deixar o botão travado.
+  const start=new Date(cin+'T12:00:00');
+  const end=new Date(cout+'T12:00:00');
+  for(let d=new Date(start); d<end; d.setDate(d.getDate()+1)){
+    const key=dateKey(d);
+    if(isOccupiedDate(key)){
+      alert('Há uma data ocupada dentro do período escolhido. Selecione outro período.');
+      return;
+    }
   }
 
-  const nights=Math.max(0, Math.round((new Date($('cout').value)-new Date($('cin').value))/86400000));
+  const nights=Math.max(0, Math.round((new Date(cout+'T12:00:00')-new Date(cin+'T12:00:00'))/86400000));
   $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
     <div class="label">RESERVA DIRETA</div>
     <h2>${cur.title}</h2>
