@@ -17,7 +17,7 @@
 
 <div id="importModal" class="modal"><div class="box"><h2>Importar anúncio do Airbnb</h2><div id="importNotice" class="notice"></div><label>Link do anúncio Airbnb</label><input id="importUrl" placeholder="https://www.airbnb.com.br/rooms/..."><div class="actions"><button class="primary" onclick="readAirbnb()">🔎 Ler anúncio</button><button class="secondary" onclick="closeImport()">Cancelar</button></div><div id="importResult"></div></div></div>
 
-<div id="photosModal" class="modal"><div class="box"><h2 id="photosTitle">Fotos</h2><div id="photosNotice" class="notice"></div><label>Adicionar fotos</label><input id="photoFiles" type="file" accept="image/*" multiple><div class="actions"><button class="primary" onclick="uploadPhotos()">⬆ Enviar fotos</button><button class="secondary" onclick="recoverLegacyCanela()">♻ Recuperar fotos antigas de Canela</button><button class="secondary" onclick="closePhotos()">Fechar</button></div><div id="photoGrid" class="photo-grid" style="margin-top:16px"></div></div></div>
+<div id="photosModal" class="modal"><div class="box"><h2 id="photosTitle">Fotos</h2><div id="photosNotice" class="notice"></div><label>Adicionar fotos</label><input id="photoFiles" type="file" accept="image/*" multiple><div class="actions"><button class="primary" onclick="uploadPhotos()">⬆ Enviar fotos</button><button class="secondary" onclick="closePhotos()">Fechar</button></div><div id="photoGrid" class="photo-grid" style="margin-top:16px"></div></div></div>
 
 <div id="calendarModal" class="modal"><div class="box"><h2 id="calendarTitle">Calendário</h2><div id="calendarNotice" class="notice"></div><label>URL do calendário iCal</label><input id="calendarUrl" placeholder="https://www.airbnb.com/calendar/ical/..."><div class="actions"><button class="primary" onclick="saveCalendar()">💾 Salvar calendário</button><button class="secondary" onclick="syncCalendar()">↻ Sincronizar agora</button><button class="secondary" onclick="closeCalendar()">Fechar</button></div><div id="calendarList" style="margin-top:16px"></div></div></div>
 
@@ -44,32 +44,6 @@ async function deleteLoft(id,name){if(!confirm(`Excluir permanentemente${name?' 
 async function openPhotos(id,name){currentPhotoLoft=id;$('photosTitle').textContent='Fotos — '+name;$('photoFiles').value='';$('photosModal').classList.add('open');renderPhotos((data.lofts.find(x=>x.id===id)||{}).photos||[])}
 function closePhotos(){$('photosModal').classList.remove('open')}
 function renderPhotos(list){$('photoGrid').innerHTML=(list||[]).length?(list||[]).map(u=>`<div class="photo"><img src="${esc(u)}"><button onclick='deletePhoto(${JSON.stringify(u)})'>✕</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Nenhuma foto cadastrada.</div>'}
-async function recoverLegacyCanela(){
-  const canela=(data.lofts||[]).find(x=>x.id==='bd2b361a-e6ea-4a2f-94f6-dab7ec9f793d');
-  if(!canela){show('Anúncio de Canela não encontrado no painel.','err','photosNotice');return}
-  if(!confirm('Recuperar as 10 fotos antigas de Canela para o cadastro do painel?\n\nIsso adicionará apenas as fotos que ainda não estiverem cadastradas.'))return;
-  const base='/legacy-canela/';
-  try{
-    show('Recuperando fotos antigas de Canela...','ok','photosNotice');
-    const existing=new Set((canela.photos||[]).map(String));
-    let added=0;
-    for(let i=1;i<=10;i++){
-      const url=location.origin+base+'canela-'+i+'.jpg';
-      if(existing.has(url))continue;
-      const r=await fetch(url,{cache:'no-store'});
-      if(!r.ok)throw new Error('Não foi possível ler a foto antiga '+i+'.');
-      const blob=await r.blob();
-      const fd=new FormData();
-      fd.append('loft_id',canela.id);
-      fd.append('file',blob,'canela-'+i+'.jpg');
-      await api('/admin/photo',{method:'POST',body:fd});
-      added++;
-    }
-    show(`✅ Recuperação concluída. ${added} foto(s) adicionada(s) ao painel.`,'ok','photosNotice');
-    await loadData();
-    renderPhotos((data.lofts.find(x=>x.id===canela.id)||{}).photos||[]);
-  }catch(e){show('❌ '+(e.message||e),'err','photosNotice')}
-}
 async function uploadPhotos(){const files=[...$('photoFiles').files];if(!currentPhotoLoft||!files.length)return show('Selecione pelo menos uma foto.','err','photosNotice');try{for(const file of files){const fd=new FormData();fd.append('loft_id',currentPhotoLoft);fd.append('file',file);await api('/admin/photo',{method:'POST',body:fd})}show('✅ Fotos enviadas.','ok','photosNotice');await loadData();renderPhotos((data.lofts.find(x=>x.id===currentPhotoLoft)||{}).photos||[])}catch(e){show('❌ '+e.message,'err','photosNotice')}}
 async function deletePhoto(url){if(!confirm('Excluir esta foto?'))return;try{await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:currentPhotoLoft,url})});await loadData();renderPhotos((data.lofts.find(x=>x.id===currentPhotoLoft)||{}).photos||[])}catch(e){show('❌ '+e.message,'err','photosNotice')}}
 async function openCalendar(id,name){currentCalendarLoft=id;$('calendarTitle').textContent='Calendário — '+name;$('calendarUrl').value='';$('calendarModal').classList.add('open');await loadCalendarPanel()}
