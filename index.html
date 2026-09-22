@@ -157,50 +157,70 @@ function publicImageUrl(url){
 }
 
 async function loadPublicData(){
+  const cards=$('cards');
+  const heroBg=$('heroBg');
   try{
-    const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{
-      method:'GET',cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}
+    const url=WORKER_URL+'/public/data?ts='+Date.now();
+    const r=await fetch(url,{method:'GET',cache:'no-store',headers:{'Accept':'application/json'}});
+    const rawText=await r.text();
+    let raw;
+    try{ raw=JSON.parse(rawText); }
+    catch(err){ throw new Error('Resposta do Worker não é um JSON válido. HTTP '+r.status); }
+    if(!r.ok || raw.ok!==true){
+      throw new Error(raw && (raw.error||raw.detail) ? String(raw.error||raw.detail) : 'Worker retornou HTTP '+r.status);
+    }
+
+    // O Worker já entrega os dados prontos no nível principal da resposta.
+    const dbLofts=Array.isArray(raw.lofts)?raw.lofts:[];
+    const prices=Array.isArray(raw.prices)?raw.prices:[];
+    const dailyPrices=Array.isArray(raw.daily_prices)?raw.daily_prices:[];
+    const priceMap={};
+    prices.forEach(x=>{
+      if(x && x.loft_id) priceMap[String(x.loft_id)]=Number(x.nightly_price ?? x.price ?? 0);
     });
-    const raw=await r.json();
-    if(!r.ok || raw.ok!==true) throw new Error(raw.error||`HTTP ${r.status}`);
-    const data=normalizePublicData(raw);
-    const priceMap=Object.fromEntries(data.prices.map(x=>[x.loft_id,Number(x.nightly_price ?? x.price ?? 0)]));
-    const baseByDbId=Object.fromEntries(Object.entries(LOFT_UUIDS).map(([localId,dbId])=>[dbId,P.find(x=>x.id===localId)]));
-    const dbLofts=Array.isArray(data.lofts)?data.lofts:[];
+
     P=dbLofts.filter(db=>db && db.active!==false).map(db=>{
-      const base=baseByDbId[db.id]||{};
-      const daily=data.daily_prices.filter(x=>x.loft_id===db.id).map(x=>({date:x.date ?? x.price_date ?? x.date_key,price:Number(x.price ?? x.nightly_price ?? 0)}));
+      const id=String(db.id||'');
+      const daily=dailyPrices.filter(x=>x && String(x.loft_id)===id).map(x=>({
+        date:x.date ?? x.price_date ?? x.date_key,
+        price:Number(x.price ?? x.nightly_price ?? 0)
+      }));
+      const photos=Array.isArray(db.photos)?db.photos.map(publicImageUrl).filter(Boolean):[];
+      const amenities=Array.isArray(db.amenities)?db.amenities:[];
       return {
-        ...base,
-        id:base.id||`db-${db.id}`,
-        dbId:db.id,
-        title:db.name ?? base.title ?? 'Loft',
-        city:db.location ?? base.city ?? '',
-        description:db.description ?? base.description ?? '',
-        max_guests:Number(db.max_guests ?? base.max_guests ?? 2),
-        cleaning:Number(db.cleaning_fee ?? base.cleaning ?? 150),
-        rate:Number(priceMap[db.id] ?? base.rate ?? 0),
+        id:'db-'+id,
+        dbId:id,
+        title:String(db.name||'Loft'),
+        city:String(db.location||''),
+        description:String(db.description||''),
+        max_guests:Number(db.max_guests||2),
+        cleaning:Number(db.cleaning_fee||0),
+        rate:Number(priceMap[id]||0),
         active:true,
-        airbnb_url:db.airbnb_url ?? base.airbnb_url ?? '',
-        images:(Array.isArray(db.photos)&&db.photos.length?db.photos:(base.images||[])).map(publicImageUrl).filter(Boolean),
-        amenities:Array.isArray(db.amenities)&&db.amenities.length?db.amenities:(base.amenities||[]),
+        airbnb_url:String(db.airbnb_url||''),
+        images:photos,
+        amenities,
         dailyPrices:daily
       };
     });
-    if(P.length){
-      $('heroBg').style.backgroundImage=`url("${P[0].images?.[0]||''}")`;
-      render(P);
-    }else{
-      render([]);
-      $('cards').innerHTML='<div class="box" style="margin:0">Nenhum loft disponível no momento.</div>';
+
+    if(heroBg){
+      const firstImage=P[0] && P[0].images && P[0].images[0];
+      heroBg.style.backgroundImage=firstImage ? 'url("'+String(firstImage).replace(/"/g,'&quot;')+'")' : '';
+    }
+
+    render(P);
+    if(!P.length){
+      cards.innerHTML='<div class="box" style="margin:0">Nenhum loft ativo foi encontrado no cadastro.</div>';
     }
   }catch(e){
     console.error('Falha ao carregar dados públicos:',e);
-    // Fonte única de verdade: se o Worker não responder, não usamos
-    // anúncios/fotos antigos embutidos no HTML.
     P=[];
     render([]);
-    $('cards').innerHTML='<div class="box" style="margin:0">Não foi possível carregar os lofts agora. Atualize a página em alguns segundos.</div>';
+    if(cards){
+      const msg=String(e && e.message ? e.message : e);
+      cards.innerHTML='<div class="box" style="margin:0"><strong>Não foi possível carregar os lofts agora.</strong><br><span class="small">'+msg.replace(/[<>]/g,'')+'</span><br><button class="btn" style="margin-top:12px" onclick="loadPublicData()">Tentar novamente</button></div>';
+    }
   }
 }
 function render(arr){
