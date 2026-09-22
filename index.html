@@ -446,7 +446,7 @@ $('calPrev').addEventListener('click',()=>{
 $('calNext').addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar();});
 
 async function checkAvailability(){
-  if(!cur) return;
+  if(!cur) return false;
   const cin=$('cin').value, cout=$('cout').value;
   const token=++availabilityRequest;
   const box=$('availability');
@@ -454,34 +454,38 @@ async function checkAvailability(){
     box.textContent='Escolha datas válidas.';
     box.style.color='#8a5a00';
     cur._available=false;
-    return;
+    return false;
   }
   box.textContent='Consultando disponibilidade...';
   box.style.color='#6b746f';
   cur._available=false;
   try{
-    const url=WORKER_URL+'/availability?loft_id='+encodeURIComponent((cur.dbId||LOFT_UUIDS[cur.id]))+
+    const id=cur.dbId||LOFT_UUIDS[cur.id];
+    if(!id) throw new Error('Identificação do loft não encontrada.');
+    const url=WORKER_URL+'/availability?loft_id='+encodeURIComponent(id)+
       '&start='+encodeURIComponent(cin)+'&end='+encodeURIComponent(cout);
-    const r=await fetch(url,{headers:{'Accept':'application/json'}});
+    const r=await fetch(url,{headers:{'Accept':'application/json'},cache:'no-store'});
     const raw=await r.text();
     let data;
     try{ data=JSON.parse(raw); }catch{ data={error:raw||('HTTP '+r.status)}; }
-    if(!r.ok) throw new Error(data.error||data.message||('HTTP '+r.status));
-    if(token!==availabilityRequest) return;
+    if(!r.ok || data.ok===false) throw new Error(data.error||data.message||('HTTP '+r.status));
+    if(token!==availabilityRequest) return false;
     if(data.available===false){
-      box.innerHTML='❌ <b>Estas datas estão indisponíveis.</b><br>O calendário do Airbnb já bloqueou este período.';
+      box.innerHTML='❌ <b>Estas datas estão indisponíveis.</b><br>O calendário do Airbnb ou uma reserva confirmada bloqueia este período.';
       box.style.color='#b42318';
       cur._available=false;
-    }else{
-      box.innerHTML='✅ <b>Datas disponíveis no Airbnb.</b>';
-      box.style.color='#087443';
-      cur._available=true;
+      return false;
     }
+    box.innerHTML='✅ <b>Datas disponíveis.</b>';
+    box.style.color='#087443';
+    cur._available=true;
+    return true;
   }catch(e){
-    if(token!==availabilityRequest) return;
+    if(token!==availabilityRequest) return false;
     box.innerHTML='⚠️ <b>Erro ao consultar o calendário.</b><br><small>'+String(e.message||e).replace(/</g,'&lt;')+'</small>';
     box.style.color='#b42318';
     cur._available=false;
+    return false;
   }
 }
 
@@ -512,9 +516,23 @@ function showPhoto(){$('lbi').src=cur.images[pi];$('count').textContent=`${pi+1}
 function move(d){pi=(pi+d+cur.images.length)%cur.images.length;showPhoto()}
 function closeLB(){$('lb').classList.remove('on')}
 
-function reserve(){
+async function reserve(){
   if(!cur){alert('Abra um loft primeiro.');return}
-  if(cur._available!==true){alert('Escolha um período que esteja disponível no calendário.');return}
+  const cin=$('cin').value, cout=$('cout').value;
+  if(!cin || !cout || cout<=cin){
+    alert('Escolha um período válido no calendário.');
+    return;
+  }
+
+  // Não dependemos mais apenas do resultado anterior do calendário.
+  // Ao clicar em “Continuar para reserva”, fazemos uma nova consulta e
+  // só abrimos o formulário quando o servidor confirmar que está livre.
+  const available=await checkAvailability();
+  if(!available){
+    alert('Escolha um período que esteja disponível no calendário.');
+    return;
+  }
+
   const nights=Math.max(0, Math.round((new Date($('cout').value)-new Date($('cin').value))/86400000));
   $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
     <div class="label">RESERVA DIRETA</div>
