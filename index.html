@@ -590,7 +590,23 @@ async function submitReservation(){
     const checkIn=$('cin').value.split('-').reverse().join('/');
     const checkOut=$('cout').value.split('-').reverse().join('/');
     const total=$('tot').textContent;
-    const waText=encodeURIComponent(`Olá! Fiz uma reserva pelo site Lofts Prime. Reserva ${rid}, ${cur.title}, de ${checkIn} a ${checkOut}. Gostaria de receber as orientações para pagamento.`);
+    const city=String(cur.city||cur.location||'').trim();
+    const waText=encodeURIComponent(`Olá! Quero solicitar uma reserva no Lofts Prime.
+
+Reserva: ${rid}
+Loft: ${cur.title}
+Cidade: ${city}
+Check-in: ${checkIn}
+Check-out: ${checkOut}
+Hóspedes: ${guests_count}
+Nome: ${name}
+E-mail: ${email}
+WhatsApp: ${phone}
+CPF: ${document}
+Observações: ${notes || 'Nenhuma'}
+Valor total: ${total}
+
+Aguardo as orientações para pagamento.`);
     $('sheet').innerHTML=`<button class="close" onclick="$('modal').classList.remove('on')">✕</button>
       <div class="booking-success">
         <div class="success-icon">✓</div>
