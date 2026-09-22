@@ -22,7 +22,7 @@ label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#4754
 input,textarea,select{width:100%;padding:11px;border:1px solid #d5dae2;border-radius:9px;font:inherit}
 textarea{min-height:90px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}.badge.rejected,.badge.cancelled{background:#fef2f2;color:#b42318}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}.badge.inactive{background:#f2f4f7;color:#667085}.danger-outline{background:#fff;border:1px solid #f04438;color:#b42318}
 .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
 .modal.open{display:flex}.box{background:#fff;border-radius:18px;width:min(700px,100%);max-height:92vh;overflow:auto;padding:22px}
 .notice{padding:11px 13px;border-radius:10px;margin-bottom:12px;font-size:13px;display:none}.ok{background:#ecfdf3;color:#087443}.err{background:#fef2f2;color:#b42318}
@@ -35,17 +35,6 @@ textarea{min-height:90px;resize:vertical}
 
 
 .login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.photo-item{border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#fff}
-.photo-item img{display:block;width:100%;height:150px;object-fit:cover}
-.photo-item .photo-actions{padding:8px}
-.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
-.calendar-list{display:grid;gap:8px;max-height:45vh;overflow:auto}
-.calendar-row{display:grid;grid-template-columns:1fr 150px auto;gap:8px;align-items:end;border:1px solid #e2e6ec;border-radius:10px;padding:10px}
-.occupancy-row{border:1px solid #e2e6ec;border-radius:10px;padding:10px;background:#fff}
-.occupancy-row.airbnb{border-left:4px solid #d97706}.occupancy-row.direct{border-left:4px solid #087443}.occupancy-row.pending{border-left:4px solid #98a2b3}
-@media(max-width:700px){.photo-grid{grid-template-columns:1fr 1fr}.calendar-row{grid-template-columns:1fr}.photo-item img{height:120px}}
-
 </style>
 </head>
 <body>
@@ -89,46 +78,13 @@ textarea{min-height:90px;resize:vertical}
     <div><label>Diária padrão (R$)</label><input id="price" type="number" min="0" step=".01" required></div>
     <div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div>
    </div>
-   <label>Link do anúncio Airbnb</label>
-   <div style="display:flex;gap:8px;align-items:stretch">
-    <input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/..." style="flex:1">
-    <button class="secondary" type="button" id="readAirbnbBtn" onclick="readAirbnb()">🔎 Ler anúncio</button>
-   </div>
-   <div id="airbnbPreview" class="muted" style="margin-top:8px;display:none"></div>
+   <label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/...">
    <label>URL do calendário iCal Airbnb (opcional)</label><input id="icalUrl" placeholder="Cole aqui somente se quiser cadastrar um calendário novo">
    <div class="actions">
     <button class="primary" type="submit">💾 Salvar alterações</button>
     <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
    </div>
   </form>
- </div>
-</div>
-
-<div id="photosModal" class="modal">
- <div class="box">
-  <h2 id="photosTitle">Fotos</h2>
-  <div id="photoNotice" class="notice"></div>
-  <label>Adicionar fotos (máx. 8 MB por arquivo)</label>
-  <input id="photoInput" type="file" accept="image/*" multiple>
-  <div class="actions"><button class="primary" type="button" onclick="uploadPhotos()">📤 Enviar fotos</button><button class="secondary" type="button" onclick="closePhotos()">Fechar</button></div>
-  <div id="photoGrid" class="photo-grid"></div>
- </div>
-</div>
-
-<div id="calendarModal" class="modal">
- <div class="box">
-  <h2 id="calendarTitle">Calendário</h2>
-  <div id="calendarNotice" class="notice"></div>
-  <div class="muted">Aqui você pode definir preços específicos por data. As datas ocupadas pelo Airbnb continuam sendo controladas pela sincronização.</div>
-  <div class="row" style="margin-top:10px">
-   <div><label>Nova data</label><input id="newDailyDate" type="date"></div>
-   <div><label>Diária específica (R$)</label><input id="newDailyPrice" type="number" min="0" step=".01"></div>
-  </div>
-  <div class="actions"><button class="primary" type="button" onclick="addDailyPrice()">＋ Adicionar data</button><button class="secondary" type="button" onclick="closeCalendar()">Fechar</button></div>
-  <h3 style="margin:18px 0 8px">Ocupação</h3>
-  <div id="calendarOccupancy" class="calendar-list"></div>
-  <h3 style="margin:18px 0 8px">Preços por data</h3>
-  <div id="calendarList" class="calendar-list"></div>
  </div>
 </div>
 
@@ -142,8 +98,7 @@ function show(msg,type='ok',target='notice'){
  setTimeout(()=>e.style.display='none',4000);
 }
 async function api(path,opts={}){
- const isForm=opts.body instanceof FormData;
- opts.headers=Object.assign(isForm?{}:{'Content-Type':'application/json'},{'Authorization':'Bearer '+token},opts.headers||{});
+ opts.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opts.headers||{});
  const r=await fetch(WORKER+path,opts);
  const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
  if(!r.ok||j.ok===false) throw new Error(j.error||j.message||('HTTP '+r.status));
@@ -190,7 +145,7 @@ function render(){
     ? `R$ ${price.toFixed(2).replace('.',',')}`
     : 'Preço não cadastrado';
   return `<div class="card">
-    <span class="badge">${l.active===false?'Inativo':'Ativo'}</span>
+    <span class="badge ${l.active===false?'inactive':''}">${l.active===false?'Inativo':'Ativo'}</span>
     <h2 style="margin-top:10px">${esc(l.name||'Sem nome')}</h2>
     <div class="muted">${esc(l.location||'Localização não informada')}</div>
     <div class="price">${priceText} <small class="muted">/ diária</small></div>
@@ -199,6 +154,8 @@ function render(){
       <button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button>
       <button class="secondary" onclick='photosSoon("${l.id}")'>Fotos</button>
       <button class="secondary" onclick='calendarSoon("${l.id}")'>Calendário</button>
+      <button class="${l.active===false?'primary':'secondary'}" onclick='toggleLoft("${l.id}",${l.active===false})'>${l.active===false?'✓ Ativar anúncio':'⏸ Desativar anúncio'}</button>
+      <button class="danger-outline" onclick='deleteLoft("${l.id}",${JSON.stringify(l.name||'')})'>🗑 Excluir</button>
     </div>
   </div>`;
  }).join('');
@@ -206,17 +163,10 @@ function render(){
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openModal(){document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
-function setAirbnbImportMode(on){
- const b=document.getElementById('readAirbnbBtn');
- if(b) b.style.display=on?'inline-block':'none';
- const p=document.getElementById('airbnbPreview');
- if(!on && p){p.style.display='none';p.textContent='';}
-}
 function newLoft(){
  document.getElementById('modalTitle').textContent='Novo apartamento';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
  document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
- setAirbnbImportMode(false);
  openModal();
 }
 function editLoft(l){
@@ -231,7 +181,6 @@ function editLoft(l){
  document.getElementById('cleaning').value=l.cleaning_fee??150;
  document.getElementById('airbnbUrl').value=l.airbnb_url||'';
  document.getElementById('icalUrl').value='';
- setAirbnbImportMode(false);
  openModal();
 }
 async function saveLoft(ev){
@@ -261,142 +210,30 @@ async function saveLoft(ev){
 function importAirbnb(){
  document.getElementById('modalTitle').textContent='Importar anúncio do Airbnb';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
- document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
- setAirbnbImportMode(true);
- show('Cole o link do anúncio do Airbnb e clique em “Ler anúncio”. O painel tentará trazer nome, descrição, localização e imagem principal. Revise os dados antes de salvar.','ok','formNotice');
- openModal();
  document.getElementById('airbnbUrl').focus();
+ document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
+ openModal();
 }
-
-async function readAirbnb(){
- const url=document.getElementById('airbnbUrl').value.trim();
- if(!url) return show('Cole primeiro o link do anúncio do Airbnb.','err','formNotice');
- const btn=document.getElementById('readAirbnbBtn');
- btn.disabled=true; btn.textContent='⏳ Lendo...';
+async function toggleLoft(id, activate){
+ const action=activate?'ativar':'desativar';
+ if(!confirm(`Deseja ${action} este anúncio? ${activate?'Ele voltará a aparecer no site.':'Ele ficará oculto para novas reservas, mas permanecerá no painel.'}`)) return;
  try{
-  const r=await api('/admin/import-airbnb',{method:'POST',body:JSON.stringify({url})});
-  const x=r.listing||{};
-  if(x.name) document.getElementById('name').value=x.name;
-  if(x.description) document.getElementById('description').value=x.description;
-  if(x.location) document.getElementById('location').value=x.location;
-  if(x.airbnb_url) document.getElementById('airbnbUrl').value=x.airbnb_url;
-  const imgs=Array.isArray(x.images)?x.images:[];
-  const preview=document.getElementById('airbnbPreview');
-  preview.style.display='block';
-  preview.innerHTML='✅ '+esc(r.message||'Dados encontrados.')+(imgs.length?`<br>📷 ${imgs.length} imagem(ns) encontrada(s). Depois de salvar, use <b>Fotos</b> para cadastrar as imagens no painel.`:'<br>📷 Nenhuma imagem pública foi encontrada automaticamente.');
-  show('Dados do Airbnb carregados. Confira e complete diária, hóspedes, limpeza e calendário antes de salvar.','ok','formNotice');
- }catch(e){
-  show('❌ '+e.message,'err','formNotice');
- }finally{
-  btn.disabled=false; btn.textContent='🔎 Ler anúncio';
- }
-}
-let currentLoftIdForPhotos='';
-let currentLoftIdForCalendar='';
-
-function photosSoon(loftId){
- currentLoftIdForPhotos=loftId;
- const l=(data.lofts||[]).find(x=>x.id===loftId);
- document.getElementById('photosTitle').textContent='Fotos — '+(l?.name||'Apartamento');
- renderPhotos();
- document.getElementById('photosModal').classList.add('open');
-}
-
-function closePhotos(){document.getElementById('photosModal').classList.remove('open')}
-
-function renderPhotos(){
- const l=(data.lofts||[]).find(x=>x.id===currentLoftIdForPhotos);
- const photos=Array.isArray(l?.photos)?l.photos:[];
- const grid=document.getElementById('photoGrid');
- if(!photos.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma foto cadastrada.</div>';return}
- grid.innerHTML=photos.map((url,i)=>`<div class="photo-item">
-   <img src="${esc(url)}" alt="Foto ${i+1}" loading="lazy">
-   <div class="photo-actions"><button class="danger" onclick='deletePhoto(${JSON.stringify(url)})'>Excluir</button></div>
- </div>`).join('');
-}
-
-async function uploadPhotos(){
- const input=document.getElementById('photoInput');
- if(!input.files?.length)return show('Selecione pelo menos uma foto.','err');
- try{
-  for(const file of input.files){
-   const fd=new FormData();fd.append('loft_id',currentLoftIdForPhotos);fd.append('file',file);
-   await api('/admin/photo',{method:'POST',body:fd});
-  }
-  input.value='';
+  await api('/admin/loft',{method:'POST',body:JSON.stringify({id,active:activate})});
+  show(activate?'✅ Anúncio ativado.':'⏸ Anúncio desativado. Ele não aparecerá mais no site.','ok');
   await loadData();
-  renderPhotos();
-  show('✅ Fotos enviadas.','ok');
- }catch(e){show('❌ '+e.message,'err','photoNotice')}
+ }catch(e){show('❌ '+e.message,'err')}
 }
-
-async function deletePhoto(url){
- if(!confirm('Excluir esta foto?'))return;
+async function deleteLoft(id,name){
+ if(!confirm(`Excluir permanentemente o anúncio${name?` "${name}"`:''}?\n\nEsta ação remove o anúncio e seus dados de calendário/preços. Se houver reservas vinculadas, o sistema bloqueará a exclusão para preservar o histórico.`)) return;
  try{
-  await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:currentLoftIdForPhotos,url})});
-  await loadData();renderPhotos();show('✅ Foto excluída.','ok');
- }catch(e){show('❌ '+e.message,'err','photoNotice')}
+  await api('/admin/loft?id='+encodeURIComponent(id),{method:'DELETE'});
+  show('🗑 Anúncio excluído permanentemente.','ok');
+  await loadData();
+ }catch(e){show('❌ '+e.message,'err')}
 }
-
-async function calendarSoon(loftId){
- currentLoftIdForCalendar=loftId;
- const l=(data.lofts||[]).find(x=>x.id===loftId);
- document.getElementById('calendarTitle').textContent='Calendário — '+(l?.name||'Apartamento');
- document.getElementById('calendarOccupancy').innerHTML='<div class="empty">Carregando calendário...</div>';
- document.getElementById('calendarModal').classList.add('open');
- try{
-  const j=await api('/admin/calendar?loft_id='+encodeURIComponent(loftId));
-  renderOccupancy(j);
-  renderCalendar(j.daily_prices||[]);
- }catch(e){
-  document.getElementById('calendarOccupancy').innerHTML='<div class="notice err" style="display:block">❌ '+esc(e.message)+'</div>';
-  renderCalendar([]);
- }
-}
-
-function closeCalendar(){document.getElementById('calendarModal').classList.remove('open')}
-
-function renderOccupancy(j){
- const list=document.getElementById('calendarOccupancy');
- const rows=[];
- (j.external_events||[]).forEach(e=>rows.push({kind:'airbnb',label:e.channel||'Airbnb',start:e.start_date,end:e.end_date,summary:e.summary||'Bloqueio externo'}));
- (j.reservations||[]).forEach(r=>{
-   if(r.status==='confirmed') rows.push({kind:'direct',label:'Reserva confirmada',start:r.check_in,end:r.check_out,summary:'#'+String(r.id||'').slice(0,8)});
-   else if(r.status==='pending') rows.push({kind:'pending',label:'Solicitação pendente',start:r.check_in,end:r.check_out,summary:'#'+String(r.id||'').slice(0,8)});
- });
- rows.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
- if(!rows.length){list.innerHTML='<div class="empty">Nenhum período ocupado ou reservado encontrado.</div>';return}
- list.innerHTML=rows.map(r=>`<div class="occupancy-row ${esc(r.kind)}"><b>${esc(r.label)}</b><div>${esc(formatDate(r.start))} → ${esc(formatDate(r.end))}</div><div class="muted">${esc(r.summary||'')}</div></div>`).join('');
-}
-
-function formatDate(v){return v?String(v).slice(0,10).split('-').reverse().join('/'):'—'}
-
-function renderCalendar(rows){
- const list=document.getElementById('calendarList');
- rows=rows||[];
- if(!rows.length){list.innerHTML='<div class="empty">Nenhum preço específico cadastrado. A diária padrão será usada.</div>';return}
- list.innerHTML=rows.map(r=>{
-   const date=r.date||r.price_date||'';
-   const price=Number(r.price??r.nightly_price??0);
-   return `<div class="calendar-row">
-     <div><b>${esc(date.split('-').reverse().join('/'))}</b><div class="muted">Preço específico da data</div></div>
-     <div><label>Diária (R$)</label><input id="dp_${esc(date)}" type="number" min="0" step=".01" value="${Number.isFinite(price)?price:0}"></div>
-     <div class="actions" style="margin:0"><button class="primary" onclick='saveDailyPrice(${JSON.stringify(date)})'>Salvar</button><button class="danger" onclick='deleteDailyPrice(${JSON.stringify(date)})'>Excluir</button></div>
-   </div>`;
- }).join('');
-}
-
-async function addDailyPrice(){
- const date=document.getElementById('newDailyDate').value;
- const price=Number(document.getElementById('newDailyPrice').value);
- if(!date||!Number.isFinite(price)||price<0)return show('Informe data e preço.','err','calendarNotice');
- try{
-  await api('/admin/daily-price',{method:'POST',body:JSON.stringify({loft_id:currentLoftIdForCalendar,date,price})});
-  document.getElementById('newDailyDate').value='';
-  document.getElementById('newDailyPrice').value='';
-  await loadData();await calendarSoon(currentLoftIdForCalendar);show('✅ Preço da data adicionado.','ok');
- }catch(e){show('❌ '+e.message,'err','calendarNotice')}
-}
+function photosSoon(){show('A área de fotos será ligada ao Supabase Storage na próxima etapa.','ok')}
+function calendarSoon(){show('O calendário continua sendo gerenciado pela sincronização Airbnb. Vamos integrar o gerenciamento completo pelo painel na próxima etapa.','ok')}
 
 async function showReservations(){
  try{
@@ -415,23 +252,18 @@ async function showReservations(){
  }catch(e){show('❌ '+e.message,'err')}
 }
 
-function extractPaymentPreference(notes){
- const m=String(notes||'').match(/Forma de pagamento escolhida:\s*([^\n]+)/i);
- return m ? m[1].trim() : '';
-}
-
 function renderReservation(r){
  const guest=r.guests||{};
  const loft=r.lofts||{};
  const status=r.status||'pending';
- const statusLabel={pending:'Pendente',confirmed:'Confirmada',rejected:'Cancelada',cancelled:'Cancelada'}[status]||status;
+ const statusLabel={pending:'Pendente',confirmed:'Confirmada',rejected:'Recusada',cancelled:'Cancelada'}[status]||status;
  const method=r.payment_method||'';
  const total=Number(r.total_amount||0).toFixed(2).replace('.',',');
  const ci=r.check_in?String(r.check_in).split('-').reverse().join('/'):''; 
  const co=r.check_out?String(r.check_out).split('-').reverse().join('/'):'';
  return `<div class="reservation ${esc(status)}">
    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-    <div><b>#${esc(r.id||'')}</b> · <span class="badge ${esc(status)}">${esc(statusLabel)}</span></div>
+    <div><b>#${esc(r.id||'')}</b> · <span class="badge">${esc(statusLabel)}</span></div>
     <b>R$ ${total}</b>
    </div>
    <div class="reservation-grid" style="margin-top:10px">
@@ -442,19 +274,13 @@ function renderReservation(r){
     <div><b>E-mail:</b> ${esc(guest.email||'')}</div>
     <div><b>CPF:</b> ${esc(guest.document||'')}</div>
     <div><b>Hóspedes:</b> ${esc(r.guests_count||'')}</div>
-    <div><b>Pagamento:</b> ${esc(method||extractPaymentPreference(r.notes)||'Aguardando')}</div>
+    <div><b>Pagamento:</b> ${esc(method||'Aguardando')}</div>
    </div>
    ${r.notes?`<div class="muted" style="margin-top:8px"><b>Observações:</b> ${esc(r.notes)}</div>`:''}
    ${status==='pending'?`<div class="actions">
      <button class="primary" onclick="confirmReservation('${r.id}','pix')">✓ Confirmar — Pix</button>
-     <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Crédito/Nubank</button>
+     <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Nubank</button>
      <button class="danger" onclick="rejectReservation('${r.id}')">Recusar</button>
-   </div>`:''}
-   ${status==='confirmed'?`<div class="actions">
-     <button class="danger" onclick="deleteReservation('${r.id}')">🗑 Excluir reserva</button>
-   </div>`:''}
-   ${(status==='rejected'||status==='cancelled')?`<div class="actions">
-     <button class="danger" onclick="deleteReservationRecord('${r.id}')">🗑 Excluir registro</button>
    </div>`:''}
  </div>`;
 }
@@ -468,29 +294,11 @@ async function confirmReservation(id,method){
  }catch(e){show('❌ '+e.message,'err')}
 }
 
-async function deleteReservation(id){
- if(!confirm('Excluir definitivamente esta reserva confirmada? As datas serão liberadas. Esta ação não pode ser desfeita.')) return;
- try{
-  await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});
-  show('✅ Reserva excluída. As datas foram liberadas.','ok');
-  await showReservations();
- }catch(e){show('❌ '+e.message,'err')}
-}
-
-async function deleteReservationRecord(id){
- if(!confirm('Excluir definitivamente este registro cancelado? Esta ação não pode ser desfeita.')) return;
- try{
-  await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});
-  show('✅ Registro excluído.','ok');
-  await showReservations();
- }catch(e){show('❌ '+e.message,'err')}
-}
-
 async function rejectReservation(id){
  if(!confirm('Recusar esta solicitação? As datas continuarão disponíveis.')) return;
  try{
   await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'rejected'})});
-  show('Solicitação cancelada. As datas continuam disponíveis.','ok');
+  show('Solicitação recusada.','ok');
   await showReservations();
  }catch(e){show('❌ '+e.message,'err')}
 }
