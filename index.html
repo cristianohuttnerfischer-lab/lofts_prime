@@ -16,6 +16,11 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
 @media(max-width:799px){header{padding:15px 18px}.logo{font-size:20px}.hero{min-height:700px;padding:120px 18px 32px}.hero h1{font-size:54px}.hero-copy{font-size:15px}.filters .grid{grid-template-columns:1fr 1fr}.filters .field{border-bottom:1px solid var(--line)}.filters .field:nth-child(odd){border-right:1px solid var(--line)}.filters .field:nth-child(even){border-right:0}.filters>.btn{width:100%}.trust{grid-template-columns:1fr}.trust-item{padding:15px 18px}.section{padding:48px 18px 72px}.section-head{display:block}.section-sub{margin-top:8px}.section-rule{margin-bottom:22px}#cards{grid-template-columns:1fr;gap:18px}.cover{height:290px}.detail{padding:95px 18px 90px}.city-hero{height:320px;padding:24px}.city-hero h2{font-size:40px}.gallery{grid-template-rows:150px 150px}.detail-title{font-size:30px}.detail>.box{padding:18px}}
 
 .booking-success{padding:4px 0 2px}.success-icon{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eaf7ef;color:#087443;font-size:28px;font-weight:900;margin-bottom:16px}.success-title{margin:0 0 7px;font-size:26px;letter-spacing:-.03em}.success-sub{margin:0 0 18px;color:#65706a;line-height:1.5}.success-card{border:1px solid #e4e9e5;border-radius:16px;background:#f8faf9;padding:15px 16px;margin:14px 0 18px}.success-card .srow{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #e8ece9;font-size:13px}.success-card .srow:last-child{border-bottom:0}.success-card .srow span{color:#69736e}.success-card .srow strong{text-align:right;color:#1d2924}.success-actions{display:grid;grid-template-columns:1fr;gap:9px}.success-actions .btn.secondary{background:#fff;color:#24332c;border:1px solid #d9e0db}.success-note{font-size:11px;color:#77817c;line-height:1.45;margin-top:13px}
+
+.airbnb-modern{margin:18px auto 100px;max-width:760px;background:linear-gradient(180deg,#fff,#fafbf9);border:1px solid #e4e9e6;border-radius:22px;padding:20px;box-shadow:0 10px 30px rgba(22,40,32,.07)}
+.airbnb-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}.airbnb-kicker{font-size:10px;font-weight:800;letter-spacing:.14em;color:#718078;margin-bottom:5px}.airbnb-modern h3{margin:0;font-size:20px;color:#18221e}.airbnb-modern>p{margin:8px 0 16px;color:#69736e;font-size:13px;line-height:1.5}.airbnb-badge{font-weight:800;font-size:12px;color:#d94444;background:#fff1f1;border:1px solid #f1cccc;border-radius:999px;padding:7px 10px}.airbnb-frame-wrap{display:flex;justify-content:center;overflow:hidden;border-radius:16px;background:#f5f6f5;padding:8px}.airbnb-frame-wrap .airbnb-embed-frame{max-width:100%!important}.airbnb-direct{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:13px 16px;border:1px solid #dfe5e1;border-radius:13px;color:#24302a;text-decoration:none;font-weight:700;background:#fff}.airbnb-direct:hover{background:#f5f7f5}
+@media(max-width:520px){.airbnb-modern{margin-left:0;margin-right:0;border-radius:18px;padding:15px}.airbnb-frame-wrap{padding:4px}.airbnb-frame-wrap .airbnb-embed-frame{width:100%!important;height:300px!important}}
+
 </style>
 <style>
 /* Lofts Prime — layout desktop */
@@ -115,6 +120,12 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
   <div id="gallery" class="gallery"></div>
   <div class="box"><h3 style="margin:0 0 12px">Escolha suas datas</h3><div class="grid"><div class="field"><div class="label">Check-in</div><input id="cin" class="input" type="date"></div><div class="field"><div class="label">Check-out</div><input id="cout" class="input" type="date"></div></div><div id="calendar" class="calendar"><div class="cal-head"><button type="button" class="cal-nav" id="calPrev" aria-label="Mês anterior">‹</button><div id="calTitle" class="cal-title"></div><button type="button" class="cal-nav" id="calNext" aria-label="Próximo mês">›</button></div><div class="cal-week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div id="calDays" class="cal-days"></div><div class="cal-legend"><span><span class="legend-dot legend-red"></span>Ocupado</span><span><span class="legend-dot legend-green"></span>Disponível</span></div><div id="calMsg" class="calendar-msg">Consultando calendário...</div></div>
   <div class="summary"><div class="line"><span id="nights">0 noites</span><span id="stay">R$ 0</span></div><div class="line"><span>Limpeza</span><span id="fee">R$ 0</span></div><div class="total"><span>Total</span><span id="tot">R$ 0</span></div><div id="availability" class="small" style="margin-top:10px;line-height:1.4"></div></div><button type="button" id="continueReservationBtn" class="btn">Continuar para reserva</button></div>
+  <section id="airbnbSection" class="airbnb-modern" style="display:none">
+    <div class="airbnb-heading"><div><div class="airbnb-kicker">TAMBÉM NO AIRBNB</div><h3>Conheça o anúncio oficial</h3></div><span class="airbnb-badge">Airbnb</span></div>
+    <p>Veja fotos, avaliações e os detalhes do anúncio. Se preferir, você pode fazer a reserva diretamente pelo Airbnb.</p>
+    <div id="airbnbEmbed" class="airbnb-frame-wrap"></div>
+    <a id="airbnbDirect" class="airbnb-direct" target="_blank" rel="noopener noreferrer nofollow">Ver e reservar no Airbnb <span>↗</span></a>
+  </section>
 </div>
 <div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
 <div id="lb" class="lb"><button class="x" onclick="closeLB()">✕</button><button class="l" onclick="move(-1)">‹</button><img id="lbi"><button class="r" onclick="move(1)">›</button><div id="count" class="count"></div></div>
@@ -338,6 +349,51 @@ function updateCityHero(city){
   $('cityPill').textContent=c.pill || 'Estadia especial';
 }
 
+function renderAirbnbEmbed(p){
+  const section=$('airbnbSection'), box=$('airbnbEmbed');
+  if(!section || !box) return;
+
+  const rawUrl=String(p?.airbnb_url||p?.airbnbUrl||'').trim();
+  const match=rawUrl.match(/\/rooms\/(\d+)/i);
+  const dbId=String(p?.dbId||'').toLowerCase();
+  const pname=String(p?.name||p?.title||'').toLowerCase();
+
+  // Mapa fixo dos 3 anúncios oficiais. O UUID do banco tem prioridade,
+  // evitando depender do nome exibido do loft.
+  let fallback=null;
+  if(dbId==='bd2b361a-e6ea-4a2f-94f6-dab7ec9f793d' || pname.includes('canela')){
+    fallback={id:'1760975750597302326',title:'Loft · Canela · ★Novidade · 1 quarto · 2 camas · 1 banheiro'};
+  }else if(dbId==='2bc66809-f7ed-42ad-8dd2-7b58fa04accd' || pname.includes('1304')){
+    fallback={id:'1529653927433325285',title:'Loft · Canoas · ★5,0 · 1 quarto · 1 cama · 1 banheiro'};
+  }else if(dbId==='4e1a265c-2e4f-46c5-9fd7-7059c83bc62f' || pname.includes('512')){
+    fallback={id:'1234716769928608285',title:'Loft · Canoas · ★5,0 · 1 quarto · 1 cama · 1 banheiro'};
+  }
+
+  if(!match && !fallback){
+    section.style.display='none';
+    box.innerHTML='';
+    const direct=$('airbnbDirect'); if(direct) direct.removeAttribute('href');
+    return;
+  }
+
+  const listingId=match ? match[1] : fallback.id;
+  const airbnbUrl=`https://www.airbnb.com.br/rooms/${listingId}?guests=1&adults=1&s=66&source=embed_widget`;
+  const title=(fallback?.id===listingId ? fallback.title : String(p?.name||'Anúncio no Airbnb')).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  section.style.display='block';
+  box.innerHTML=`<div class="airbnb-embed-frame" data-id="${listingId}" data-view="home" data-hide-price="true" style="width:450px;height:300px;margin:auto"><a href="${airbnbUrl}">Ver no Airbnb</a><a href="${airbnbUrl}" rel="nofollow">${title}</a></div>`;
+  const direct=$('airbnbDirect'); if(direct) direct.href=airbnbUrl;
+
+  let sdk=document.querySelector('script[data-airbnb-sdk="1"]');
+  if(!sdk){
+    sdk=document.createElement('script');
+    sdk.async=true;
+    sdk.src='https://www.airbnb.com.br/embeddable/airbnb_jssdk';
+    sdk.dataset.airbnbSdk='1';
+    document.body.appendChild(sdk);
+  }
+}
+
 function openP(id){
   cur=P.find(p=>p.id===id);
   updateCityHero(cur.city);
@@ -350,6 +406,7 @@ function openP(id){
   $('tags').innerHTML=amenityHtml(cur.amenities,99);
   let im=cur.images&&cur.images.length?cur.images:[''];
   $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
+  renderAirbnbEmbed(cur);
   let a=new Date(),b=new Date(a);
   b.setDate(b.getDate()+1);
   $('cin').value=a.toISOString().slice(0,10);
