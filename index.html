@@ -114,7 +114,7 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
   <div class="property-intro"><div class="property-kicker">LOFT PREMIUM</div><h2 id="dt" class="detail-title"></h2><div id="dm" class="meta"></div><p id="dd" class="detail-desc"></p><div id="tags" class="amenity-row"></div></div>
   <div id="gallery" class="gallery"></div>
   <div class="box"><h3 style="margin:0 0 12px">Escolha suas datas</h3><div class="grid"><div class="field"><div class="label">Check-in</div><input id="cin" class="input" type="date"></div><div class="field"><div class="label">Check-out</div><input id="cout" class="input" type="date"></div></div><div id="calendar" class="calendar"><div class="cal-head"><button type="button" class="cal-nav" id="calPrev" aria-label="Mês anterior">‹</button><div id="calTitle" class="cal-title"></div><button type="button" class="cal-nav" id="calNext" aria-label="Próximo mês">›</button></div><div class="cal-week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div id="calDays" class="cal-days"></div><div class="cal-legend"><span><span class="legend-dot legend-red"></span>Ocupado</span><span><span class="legend-dot legend-green"></span>Disponível</span></div><div id="calMsg" class="calendar-msg">Consultando calendário...</div></div>
-  <div class="summary"><div class="line"><span id="nights">0 noites</span><span id="stay">R$ 0</span></div><div class="line"><span>Limpeza</span><span id="fee">R$ 0</span></div><div class="total"><span>Total</span><span id="tot">R$ 0</span></div><div id="availability" class="small" style="margin-top:10px;line-height:1.4"></div></div><button class="btn" onclick="reserve()">Continuar para reserva</button></div>
+  <div class="summary"><div class="line"><span id="nights">0 noites</span><span id="stay">R$ 0</span></div><div class="line"><span>Limpeza</span><span id="fee">R$ 0</span></div><div class="total"><span>Total</span><span id="tot">R$ 0</span></div><div id="availability" class="small" style="margin-top:10px;line-height:1.4"></div></div><button type="button" id="continueReservationBtn" class="btn">Continuar para reserva</button></div>
 </div>
 <div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
 <div id="lb" class="lb"><button class="x" onclick="closeLB()">✕</button><button class="l" onclick="move(-1)">‹</button><img id="lbi"><button class="r" onclick="move(1)">›</button><div id="count" class="count"></div></div>
@@ -356,10 +356,10 @@ function openP(id){
   $('cout').value=b.toISOString().slice(0,10);
   calc();
   loadCalendar();
-  loadPublicData();
 }
 
 let blockedRanges=[];
+let availabilityRequest=0;
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let calendarLoading=false;
 
@@ -517,6 +517,7 @@ function move(d){pi=(pi+d+cur.images.length)%cur.images.length;showPhoto()}
 function closeLB(){$('lb').classList.remove('on')}
 
 function reserve(){
+  try{
   if(!cur){alert('Abra um loft primeiro.');return}
   const cin=$('cin').value, cout=$('cout').value;
   if(!cin || !cout || cout<=cin){
@@ -551,8 +552,19 @@ function reserve(){
     <textarea id="r_notes" class="input" style="border:1px solid #e1e6e3;border-radius:10px;padding:11px;margin-top:8px;min-height:70px" placeholder="Observações (opcional)"></textarea>
     <div id="r_msg" class="small" style="margin-top:10px"></div>
     <button id="r_btn" class="btn" onclick="submitReservation()">Confirmar reserva</button>`;
-  $('modal').classList.add('on')
+  $('modal').classList.add('on');
+  }catch(e){
+    console.error('Erro ao abrir formulário de reserva:',e);
+    alert('Não foi possível abrir o formulário de reserva. Tente novamente.');
+  }
 }
+
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('#continueReservationBtn');
+  if(!btn) return;
+  e.preventDefault();
+  reserve();
+});
 
 async function submitReservation(){
   const btn=$('r_btn'), msg=$('r_msg');
