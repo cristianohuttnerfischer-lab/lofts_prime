@@ -1,64 +1,464 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lofts Prime — Painel</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f6f8;color:#17202a}header{background:#111827;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}header strong{font-size:20px}header span{font-size:13px;opacity:.75}main{max-width:1200px;margin:auto;padding:20px}.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}.toolbar button{min-height:44px}button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}.primary{background:#111827;color:#fff}.secondary{background:#fff;border:1px solid #d8dde5}.danger{background:#fee2e2;color:#991b1b}.danger-outline{background:#fff;border:1px solid #f04438;color:#b42318}.card{background:#fff;border:1px solid #e2e6ec;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #00000008}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:900px){.grid{grid-template-columns:1fr}}h2{margin:0 0 5px;font-size:19px}.muted{color:#667085;font-size:13px}.price{font-size:20px;font-weight:800;margin:12px 0}label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#475467}input,textarea,select{width:100%;padding:11px;border:1px solid #d5dae2;border-radius:9px;font:inherit}textarea{min-height:90px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}.badge.inactive{background:#f2f4f7;color:#667085}.badge.red{background:#fee2e2;color:#b42318}.reservation{border:1px solid #e2e6ec;border-radius:14px;padding:14px;margin:10px 0;background:#fff}.reservation.pending{border-left:5px solid #d97706}.reservation.confirmed{border-left:5px solid #087443}.reservation.rejected,.reservation.cancelled{border-left:5px solid #b42318;opacity:.9}.reservation-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px}@media(max-width:700px){.row,.reservation-grid{grid-template-columns:1fr}.toolbar{display:grid;grid-template-columns:1fr 1fr}.toolbar button{width:100%}.toolbar .primary:first-child{grid-column:1/-1}}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.open{display:flex}.box{background:#fff;border-radius:18px;width:min(780px,100%);max-height:92vh;overflow:auto;padding:22px}.notice{padding:11px 13px;border-radius:10px;margin-bottom:12px;font-size:13px;display:none}.ok{background:#ecfdf3;color:#087443}.err{background:#fef2f2;color:#b42318}.empty{text-align:center;padding:35px;color:#667085}.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo{position:relative;border-radius:12px;overflow:hidden;background:#eee;aspect-ratio:1}.photo img{width:100%;height:100%;object-fit:cover}.photo button{position:absolute;right:5px;top:5px;padding:6px 8px;background:#fff;color:#b42318}.import-preview{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.import-preview img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.calendar-item{border:1px solid #e2e6ec;border-radius:12px;padding:12px;margin:8px 0}.calendar-item code{word-break:break-all;font-size:11px}.event-list{max-height:220px;overflow:auto}.small-btn{padding:7px 10px;font-size:12px}
-.login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:100}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f6f8;color:#17202a}
+header{background:#111827;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header strong{font-size:20px}header span{font-size:13px;opacity:.75}
+main{max-width:1180px;margin:auto;padding:20px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.toolbar button{min-height:44px}
+@media(max-width:700px){.toolbar{display:grid;grid-template-columns:1fr 1fr}.toolbar button{width:100%}.toolbar .primary{grid-column:1/-1}}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}
+.primary{background:#111827;color:#fff}.secondary{background:#fff;border:1px solid #d8dde5}.danger{background:#fee2e2;color:#991b1b}
+.card{background:#fff;border:1px solid #e2e6ec;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #00000008}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+h2{margin:0 0 5px;font-size:19px}.muted{color:#667085;font-size:13px}.price{font-size:20px;font-weight:800;margin:12px 0}
+label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px;color:#475467}
+input,textarea,select{width:100%;padding:11px;border:1px solid #d5dae2;border-radius:9px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-size:12px;font-weight:700}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.open{display:flex}.box{background:#fff;border-radius:18px;width:min(700px,100%);max-height:92vh;overflow:auto;padding:22px}
+.notice{padding:11px 13px;border-radius:10px;margin-bottom:12px;font-size:13px;display:none}.ok{background:#ecfdf3;color:#087443}.err{background:#fef2f2;color:#b42318}
+.spinner{opacity:.65}.empty{text-align:center;padding:35px;color:#667085}
+.reservation{border:1px solid #e2e6ec;border-radius:14px;padding:14px;margin:10px 0;background:#fff}
+.reservation.pending{border-left:5px solid #d97706}.reservation.confirmed{border-left:5px solid #087443}
+.reservation.rejected,.reservation.cancelled{border-left:5px solid #b42318;opacity:.8}
+.reservation-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px}
+@media(max-width:700px){.reservation-grid{grid-template-columns:1fr}}
+
+
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc;cursor:grab;touch-action:none;user-select:none}.photo-item:active{cursor:grabbing}.photo-item.dragging{opacity:.45;transform:scale(.98)}.photo-item.drag-over{outline:3px solid #111827;outline-offset:2px}.photo-order{position:absolute;left:6px;top:6px;padding:5px 8px;border-radius:999px;background:#111827;color:#fff;font-size:11px;font-weight:800;z-index:2}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b;z-index:3}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
+
+.login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
 </style>
 </head>
 <body>
-<div id="loginScreen" class="login-wrap"><form id="loginForm" class="login-card" onsubmit="loginAdmin(event)"><h1>Lofts Prime</h1><p>Acesso ao painel administrativo</p><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" required><div id="loginError" class="login-error" role="alert"></div><button id="loginButton" class="primary" type="submit">Entrar</button></form></div>
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <h1>Lofts Prime</h1>
+    <p>Acesso ao painel administrativo</p>
+    <label>E-mail</label><input id="loginEmail" type="email" autocomplete="username">
+    <label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password">
+    <div id="loginError" class="login-error"></div>
+    <button class="primary" onclick="loginAdmin()">Entrar</button>
+  </div>
+</div>
 <header><div><strong>Lofts Prime</strong><br><span>Painel administrativo</span></div><span id="status">Conectando...</span></header>
-<main><div id="notice" class="notice"></div><div class="toolbar"><button class="primary" onclick="newLoft()">＋ Novo apartamento</button><button class="secondary" onclick="importAirbnb()">↗ Importar anúncio do Airbnb</button><button class="secondary" onclick="showReservations()">📋 Solicitações de reserva</button><button class="secondary" onclick="loadData()">↻ Atualizar</button><button class="secondary" onclick="logout()">Sair</button></div><div id="reservationsPanel"></div><div id="lofts" class="grid"><div class="empty">Carregando...</div></div></main>
+<main>
+  <div id="notice" class="notice"></div>
+  <div class="toolbar">
+    <button class="primary" onclick="newLoft()">＋ Novo apartamento</button>
+    <button class="secondary" onclick="importAirbnb()">↗ Importar anúncio do Airbnb</button>
+    <button class="secondary" onclick="showReservations()">📋 Solicitações de reserva</button>
+    <button class="secondary" onclick="loadData()">↻ Atualizar</button>
+    <button class="secondary" onclick="logout()">Sair</button>
+  </div>
+  <div id="reservationsPanel"></div>
+  <div id="lofts" class="grid"><div class="empty">Carregando...</div></div>
+</main>
 
-<div id="modal" class="modal"><div class="box"><h2 id="modalTitle">Novo apartamento</h2><div id="formNotice" class="notice"></div><form onsubmit="saveLoft(event)"><input type="hidden" id="loftId"><input type="hidden" id="importedPhotos"><label>Nome do apartamento</label><input id="name" required><label>Descrição</label><textarea id="description"></textarea><div class="row"><div><label>Cidade / localização</label><input id="location"></div><div><label>Máximo de hóspedes</label><input id="maxGuests" type="number" min="1" value="2"></div></div><div class="row"><div><label>Diária padrão (R$)</label><input id="price" type="number" min="0" step=".01" required></div><div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div></div><label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/..."><label>URL do calendário iCal Airbnb</label><input id="icalUrl" placeholder="Cole o link exportado no Airbnb"><div class="actions"><button class="primary" type="submit">💾 Salvar</button><button class="secondary" type="button" onclick="closeModal()">Cancelar</button></div></form></div></div>
+<div id="modal" class="modal">
+ <div class="box">
+  <h2 id="modalTitle">Novo apartamento</h2>
+  <div id="formNotice" class="notice"></div>
+  <form onsubmit="saveLoft(event)">
+   <input type="hidden" id="loftId">
+   <label>Nome do apartamento</label><input id="name" required>
+   <label>Descrição</label><textarea id="description"></textarea>
+   <div class="row">
+    <div><label>Cidade / localização</label><input id="location"></div>
+    <div><label>Máximo de hóspedes</label><input id="maxGuests" type="number" min="1" value="2"></div>
+   </div>
+   <div class="row">
+    <div><label>Diária padrão (R$)</label><input id="price" type="number" min="0" step=".01" required></div>
+    <div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div>
+   </div>
+   <label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/...">
+   <label>URL do calendário iCal Airbnb (opcional)</label><input id="icalUrl" placeholder="Cole aqui somente se quiser cadastrar um calendário novo">
+   <div class="actions">
+    <button class="primary" type="submit">💾 Salvar alterações</button>
+    <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
+   </div>
+  </form>
+ </div>
+</div>
 
-<div id="importModal" class="modal"><div class="box"><h2>Importar anúncio do Airbnb</h2><div id="importNotice" class="notice"></div><label>Link do anúncio Airbnb</label><input id="importUrl" placeholder="https://www.airbnb.com.br/rooms/..."><div class="actions"><button class="primary" onclick="readAirbnb()">🔎 Ler anúncio</button><button class="secondary" onclick="closeImport()">Cancelar</button></div><div id="importResult"></div></div></div>
+<div id="photoModal" class="modal"><div class="box">
+ <h2>Fotos do apartamento</h2><div id="photoNotice" class="notice"></div>
+ <label>Adicionar foto</label><input id="photoFile" type="file" accept="image/*">
+ <div class="actions"><button class="primary" onclick="uploadPhoto()">⬆ Enviar foto</button><button class="secondary" onclick="closePhotoModal()">Fechar</button></div>
+ <div class="muted" style="margin-top:8px">Arraste as fotos para definir a ordem. A foto <b>1</b> será a primeira no anúncio e a ordem será mantida no site.</div>
+ <div id="photoGrid" class="photo-grid"></div>
+</div></div>
 
-<div id="photosModal" class="modal"><div class="box"><h2 id="photosTitle">Fotos</h2><div id="photosNotice" class="notice"></div><label>Adicionar fotos</label><input id="photoFiles" type="file" accept="image/*" multiple><div class="actions"><button class="primary" onclick="uploadPhotos()">⬆ Enviar fotos</button><button class="secondary" onclick="closePhotos()">Fechar</button></div><div id="photoGrid" class="photo-grid" style="margin-top:16px"></div></div></div>
-
-<div id="calendarModal" class="modal"><div class="box"><h2 id="calendarTitle">Calendário</h2><div id="calendarNotice" class="notice"></div><label>URL do calendário iCal</label><input id="calendarUrl" placeholder="https://www.airbnb.com/calendar/ical/..."><div class="actions"><button class="primary" onclick="saveCalendar()">💾 Salvar calendário</button><button class="secondary" onclick="syncCalendar()">↻ Sincronizar agora</button><button class="secondary" onclick="closeCalendar()">Fechar</button></div><div id="calendarList" style="margin-top:16px"></div></div></div>
+<div id="calendarModal" class="modal"><div class="box">
+ <h2 id="calendarModalTitle">Calendário</h2><div id="calendarNotice" class="notice"></div>
+ <div class="calendar-head"><button class="secondary" onclick="changeCalendarMonth(-1)">‹</button><div id="calendarTitle" class="calendar-title"></div><button class="secondary" onclick="changeCalendarMonth(1)">›</button></div>
+ <div class="calendar-grid" id="calendarGrid"></div>
+ <div class="calendar-legend"><span><i class="dot free"></i>Disponível</span><span><i class="dot block"></i>Bloqueado</span><span><i class="dot price"></i>Preço especial</span></div>
+ <p class="muted">Toque em uma data disponível para cadastrar/alterar o preço daquela diária. Deixe em branco para usar a diária padrão.</p>
+ <div class="actions"><button class="secondary" onclick="closeCalendarModal()">Fechar</button></div>
+</div></div>
 
 <script>
 const WORKER='https://lofts-prime-sync.cristianohuttnerfischer.workers.dev';
-let token=localStorage.getItem('lofts_prime_admin_token')||'';let data={lofts:[],prices:[],channel_calendars:[],blocked_dates:[]};let reservations=[];let currentPhotoLoft=null;let currentCalendarLoft=null;let importedPhotos=[];
-const $=id=>document.getElementById(id);
-function show(msg,type='ok',target='notice'){const e=$(target);e.textContent=msg;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',5000)}
-async function api(path,opts={}){const h=Object.assign({'Authorization':'Bearer '+token},opts.headers||{});if(!(opts.body instanceof FormData))h['Content-Type']='application/json';opts.headers=h;const r=await fetch(WORKER+path,opts);const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}if(!r.ok||j.ok===false)throw new Error(j.error||j.message||('HTTP '+r.status));return j}
+let token=localStorage.getItem('lofts_prime_admin_token')||'';
+let data={lofts:[],prices:[],settings:[]}; let reservations=[];
+
+function show(msg,type='ok',target='notice'){
+ const e=document.getElementById(target);e.textContent=msg;e.className='notice '+type;e.style.display='block';
+ setTimeout(()=>e.style.display='none',4000);
+}
+async function api(path,opts={}){
+ opts.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opts.headers||{});
+ const r=await fetch(WORKER+path,opts);
+ const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
+ if(!r.ok||j.ok===false) throw new Error(j.error||j.message||('HTTP '+r.status));
+ return j;
+}
+function showLogin(){document.getElementById('loginScreen').style.display='flex';}
+function hideLogin(){document.getElementById('loginScreen').style.display='none';}
+async function loginAdmin(){
+ const email=document.getElementById('loginEmail').value.trim();
+ const password=document.getElementById('loginPassword').value;
+ const out=document.getElementById('loginError');
+ out.textContent='Entrando...';
+ try{
+  const r=await fetch(WORKER+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok) throw new Error(j.error||'Falha no login');
+  token=j.access_token||'';
+  if(!token) throw new Error('O servidor não retornou o token de acesso.');
+  localStorage.setItem('lofts_prime_admin_token',token);
+  out.textContent=''; hideLogin(); await loadData();
+ }catch(e){out.textContent=e.message||String(e);}
+}
+
+async function loadData(){
+ if(!token){showLogin();return}
+ try{
+  const j=await api('/admin/data');data=j;
+  document.getElementById('status').textContent='● Conectado';
+  render();
+ }catch(e){
+  document.getElementById('status').textContent='Erro de conexão';
+  if(/401|Sessão|Unauthorized/i.test(String(e.message||e))){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();}
+  show(e.message,'err');
+ }
+}
+function render(){
+ const el=document.getElementById('lofts');
+ if(!data.lofts?.length){el.innerHTML='<div class="empty">Nenhum apartamento cadastrado.</div>';return}
+ el.innerHTML=data.lofts.map(l=>{
+  const p=(data.prices||[]).find(x=>x.loft_id===l.id);
+  const rawPrice=p?.nightly_price ?? p?.price;
+  const price=Number(rawPrice);
+  const priceText=Number.isFinite(price)
+    ? `R$ ${price.toFixed(2).replace('.',',')}`
+    : 'Preço não cadastrado';
+  return `<div class="card">
+    <span class="badge">${l.active===false?'Inativo':'Ativo'}</span>
+    <h2 style="margin-top:10px">${esc(l.name||'Sem nome')}</h2>
+    <div class="muted">${esc(l.location||'Localização não informada')}</div>
+    <div class="price">${priceText} <small class="muted">/ diária</small></div>
+    <div class="muted">Até ${l.max_guests||2} hóspedes · Limpeza R$ ${Number(l.cleaning_fee??150).toFixed(2).replace('.',',')}</div>
+    <div class="actions">
+      <button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button>
+      <button class="secondary" onclick='openPhotos("${l.id}")'>Fotos</button>
+      <button class="secondary" onclick='openCalendar("${l.id}")'>Calendário</button>
+    </div>
+  </div>`;
+ }).join('');
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function showLogin(){ $('loginScreen').style.display='flex'}function hideLogin(){$('loginScreen').style.display='none'}
-async function loginAdmin(ev){if(ev)ev.preventDefault();const email=$('loginEmail').value.trim(),password=$('loginPassword').value,out=$('loginError'),btn=$('loginButton');if(!email||!password){out.textContent='Informe e-mail e senha.';return}out.textContent='Conectando...';btn.disabled=true;btn.textContent='Entrando...';try{const r=await fetch(WORKER+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password}),cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error(j.error||('Falha no login (HTTP '+r.status+')'));token=j.access_token||'';if(!token)throw new Error('O servidor não retornou o token de acesso.');localStorage.setItem('lofts_prime_admin_token',token);out.textContent='';hideLogin();await loadData()}catch(e){out.textContent=e.message||String(e)}finally{btn.disabled=false;btn.textContent='Entrar'}}
-async function loadData(){if(!token){showLogin();return}try{data=await api('/admin/data');$('status').textContent='● Conectado';render()}catch(e){$('status').textContent='Erro de conexão';if(/401|Unauthorized|Sessão/i.test(e.message)){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin()}show(e.message,'err')}}
-function render(){const el=$('lofts');if(!data.lofts?.length){el.innerHTML='<div class="empty">Nenhum apartamento cadastrado.</div>';return}el.innerHTML=data.lofts.map(l=>{const p=(data.prices||[]).find(x=>x.loft_id===l.id);const n=Number(p?.nightly_price??p?.price??0);return `<div class="card"><span class="badge ${l.active===false?'inactive':''}">${l.active===false?'Inativo':'Ativo'}</span><h2 style="margin-top:10px">${esc(l.name||'Sem nome')}</h2><div class="muted">${esc(l.location||'Localização não informada')}</div><div class="price">${Number.isFinite(n)?'R$ '+n.toFixed(2).replace('.',','):'Preço não cadastrado'} <small class="muted">/ diária</small></div><div class="muted">Até ${l.max_guests||2} hóspedes · Limpeza R$ ${Number(l.cleaning_fee??150).toFixed(2).replace('.',',')}</div><div class="actions"><button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button><button class="secondary" onclick='openPhotos("${l.id}",${JSON.stringify(l.name||'')})'>Fotos</button><button class="secondary" onclick='openCalendar("${l.id}",${JSON.stringify(l.name||'')})'>Calendário</button><button class="${l.active===false?'primary':'secondary'}" onclick='toggleLoft("${l.id}",${l.active===false})'>${l.active===false?'✓ Ativar':'⏸ Desativar'}</button><button class="danger-outline" onclick='deleteLoft("${l.id}",${JSON.stringify(l.name||'')})'>🗑 Excluir</button></div></div>`}).join('')}
-function openModal(){$('modal').classList.add('open')}function closeModal(){$('modal').classList.remove('open')}
-function newLoft(){importedPhotos=[];$('modalTitle').textContent='Novo apartamento';$('loftId').value='';$('name').value='';$('description').value='';$('location').value='';$('maxGuests').value=2;$('price').value=0;$('cleaning').value=150;$('airbnbUrl').value='';$('icalUrl').value='';$('importedPhotos').value='';openModal()}
-function editLoft(l){importedPhotos=Array.isArray(l.photos)?l.photos.slice():[];$('modalTitle').textContent='Editar apartamento';$('loftId').value=l.id;$('name').value=l.name||'';$('description').value=l.description||'';$('location').value=l.location||'';$('maxGuests').value=l.max_guests||2;const p=(data.prices||[]).find(x=>x.loft_id===l.id);$('price').value=Number(p?.nightly_price??p?.price??0);$('cleaning').value=l.cleaning_fee??150;$('airbnbUrl').value=l.airbnb_url||'';$('icalUrl').value='';$('importedPhotos').value=JSON.stringify(importedPhotos);openModal()}
-async function saveLoft(ev){ev.preventDefault();const id=$('loftId').value;const body={loft_id:id||null,name:$('name').value.trim(),description:$('description').value.trim(),location:$('location').value.trim(),max_guests:Number($('maxGuests').value||2),cleaning_fee:Number($('cleaning').value||0),airbnb_url:$('airbnbUrl').value.trim(),photos:importedPhotos};try{const r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});const loftId=r.loft?.id||id;const price=Number($('price').value||0);if(loftId)await api('/admin/price',{method:'POST',body:JSON.stringify({loft_id:loftId,nightly_price:price})});const ical=$('icalUrl').value.trim();if(ical&&loftId)await api('/admin/channel-calendar',{method:'POST',body:JSON.stringify({loft_id:loftId,channel:'Airbnb',calendar_url:ical})});closeModal();show(id?'✅ Alterações salvas.':'✅ Apartamento importado/criado com sucesso.','ok');await loadData()}catch(e){show('❌ '+e.message,'err','formNotice')}}
-function importAirbnb(){$('importUrl').value='';$('importResult').innerHTML='';$('importNotice').style.display='none';$('importModal').classList.add('open');$('importUrl').focus()}function closeImport(){$('importModal').classList.remove('open')}
-async function readAirbnb(){const url=$('importUrl').value.trim();if(!url)return show('Cole o link do anúncio Airbnb.','err','importNotice');show('Lendo anúncio do Airbnb...','ok','importNotice');try{const r=await api('/admin/airbnb-import',{method:'POST',body:JSON.stringify({url})});const x=r.listing;importedPhotos=x.photos||[];$('importResult').innerHTML=`<div class="card" style="margin-top:14px"><b>Dados encontrados</b><label>Nome</label><input id="impName" value="${esc(x.name||'')}"><label>Descrição</label><textarea id="impDesc">${esc(x.description||'')}</textarea><div class="row"><div><label>Cidade/localização</label><input id="impLoc" value="${esc(x.location||'')}"></div><div><label>Máximo de hóspedes</label><input id="impGuests" type="number" value="${Number(x.max_guests||2)}"></div></div><label>Fotos encontradas: ${importedPhotos.length}</label><div class="import-preview">${importedPhotos.slice(0,10).map(u=>`<img src="${esc(u)}" onerror="this.style.display='none'">`).join('')}</div><div class="actions"><button class="primary" onclick="useImported()">✓ Usar dados e abrir cadastro</button></div></div>`;show('Dados encontrados. Confira e clique em Usar dados.','ok','importNotice')}catch(e){show('❌ '+e.message,'err','importNotice')}}
-function useImported(){const u=$('importUrl').value.trim();$('modalTitle').textContent='Novo apartamento — importado do Airbnb';$('loftId').value='';$('name').value=$('impName')?.value||'';$('description').value=$('impDesc')?.value||'';$('location').value=$('impLoc')?.value||'';$('maxGuests').value=$('impGuests')?.value||2;$('price').value=0;$('cleaning').value=150;$('airbnbUrl').value=u;$('icalUrl').value='';$('importedPhotos').value=JSON.stringify(importedPhotos);closeImport();openModal()}
-async function toggleLoft(id,activate){if(!confirm(activate?'Reativar este anúncio e exibi-lo novamente no site?':'Desativar este anúncio temporariamente? Ele permanecerá no painel, mas não deverá aparecer no site.'))return;try{await api('/admin/loft',{method:'POST',body:JSON.stringify({loft_id:id,active:activate})});show(activate?'✅ Anúncio ativado.':'⏸ Anúncio desativado e retirado do site.','ok');await loadData()}catch(e){show('❌ '+e.message,'err')}}
-async function deleteLoft(id,name){if(!confirm(`Excluir permanentemente${name?' "'+name+'"':''}?\n\nSe houver reservas vinculadas, o sistema bloqueará a exclusão para preservar o histórico.`))return;try{await api('/admin/loft?id='+encodeURIComponent(id),{method:'DELETE'});show('🗑 Anúncio excluído.','ok');await loadData()}catch(e){show('❌ '+e.message,'err')}}
-async function openPhotos(id,name){currentPhotoLoft=id;$('photosTitle').textContent='Fotos — '+name;$('photoFiles').value='';$('photosModal').classList.add('open');renderPhotos((data.lofts.find(x=>x.id===id)||{}).photos||[])}
-function closePhotos(){$('photosModal').classList.remove('open')}
-function renderPhotos(list){$('photoGrid').innerHTML=(list||[]).length?(list||[]).map(u=>`<div class="photo"><img src="${esc(u)}"><button onclick='deletePhoto(${JSON.stringify(u)})'>✕</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Nenhuma foto cadastrada.</div>'}
-async function uploadPhotos(){const files=[...$('photoFiles').files];if(!currentPhotoLoft||!files.length)return show('Selecione pelo menos uma foto.','err','photosNotice');try{for(const file of files){const fd=new FormData();fd.append('loft_id',currentPhotoLoft);fd.append('file',file);await api('/admin/photo',{method:'POST',body:fd})}show('✅ Fotos enviadas.','ok','photosNotice');await loadData();renderPhotos((data.lofts.find(x=>x.id===currentPhotoLoft)||{}).photos||[])}catch(e){show('❌ '+e.message,'err','photosNotice')}}
-async function deletePhoto(url){if(!confirm('Excluir esta foto?'))return;try{await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:currentPhotoLoft,url})});await loadData();renderPhotos((data.lofts.find(x=>x.id===currentPhotoLoft)||{}).photos||[])}catch(e){show('❌ '+e.message,'err','photosNotice')}}
-async function openCalendar(id,name){currentCalendarLoft=id;$('calendarTitle').textContent='Calendário — '+name;$('calendarUrl').value='';$('calendarModal').classList.add('open');await loadCalendarPanel()}
-function closeCalendar(){$('calendarModal').classList.remove('open')}
-async function loadCalendarPanel(){try{const j=await api('/admin/calendar?loft_id='+encodeURIComponent(currentCalendarLoft));$('calendarList').innerHTML=(j.calendars||[]).map(c=>`<div class="calendar-item"><b>${esc(c.channel||'Calendário')}</b><br><code>${esc(c.calendar_url||'')}</code><div class="actions"><button class="danger small-btn" onclick='deleteCalendar("${c.id}")'>Excluir calendário</button></div></div>`).join('')||'<div class="empty">Nenhum calendário cadastrado.</div>';if(j.events?.length)$('calendarList').innerHTML+=`<h3>Eventos sincronizados</h3><div class="event-list">${j.events.map(e=>`<div class="calendar-item"><b>${esc(e.start_date||'')} → ${esc(e.end_date||'')}</b><br><span class="muted">${esc(e.summary||e.channel||'Airbnb')}</span></div>`).join('')}</div>`}catch(e){show('❌ '+e.message,'err','calendarNotice')}}
-async function saveCalendar(){const url=$('calendarUrl').value.trim();if(!url)return show('Informe a URL iCal.','err','calendarNotice');try{await api('/admin/channel-calendar',{method:'POST',body:JSON.stringify({loft_id:currentCalendarLoft,channel:'Airbnb',calendar_url:url})});show('✅ Calendário salvo.','ok','calendarNotice');await loadCalendarPanel()}catch(e){show('❌ '+e.message,'err','calendarNotice')}}
-async function deleteCalendar(id){if(!confirm('Excluir este calendário da sincronização?'))return;try{await api('/admin/channel-calendar?id='+encodeURIComponent(id),{method:'DELETE'});await loadCalendarPanel()}catch(e){show('❌ '+e.message,'err','calendarNotice')}}
-async function syncCalendar(){try{show('Sincronizando calendários...','ok','calendarNotice');const j=await api('/sync',{method:'POST'});show(`✅ Sincronização concluída. ${j.events||0} evento(s) encontrados.`,'ok','calendarNotice');await loadCalendarPanel()}catch(e){show('❌ '+e.message,'err','calendarNotice')}}
-async function showReservations(){try{const j=await api('/admin/reservations');reservations=j.reservations||[];$('reservationsPanel').innerHTML=`<div class="card"><h2>Solicitações de reserva</h2><div class="muted" style="margin-bottom:12px">Somente reservas confirmadas bloqueiam as datas. A confirmação também verifica sobreposição no mesmo loft.</div>${reservations.length?reservations.map(renderReservation).join(''):'<div class="empty">Nenhuma solicitação encontrada.</div>'}</div>`}catch(e){show('❌ '+e.message,'err')}}
-function renderReservation(r){const g=r.guests||{},l=r.lofts||{},s=r.status||'pending',label={pending:'Pendente',confirmed:'Confirmada',rejected:'Recusada',cancelled:'Cancelada'}[s]||s,total=Number(r.total_amount||0).toFixed(2).replace('.',','),ci=r.check_in?String(r.check_in).split('-').reverse().join('/'):'',co=r.check_out?String(r.check_out).split('-').reverse().join('/'):'',red=(s==='cancelled'||s==='rejected');return `<div class="reservation ${esc(s)}"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><b>#${esc(r.id)}</b> · <span class="badge ${red?'red':''}">${esc(label)}</span></div><b>R$ ${total}</b></div><div class="reservation-grid" style="margin-top:10px"><div><b>Loft:</b> ${esc(l.name||r.loft_id)}</div><div><b>Período:</b> ${ci} → ${co}</div><div><b>Hóspede:</b> ${esc(g.name||'')}</div><div><b>WhatsApp:</b> ${esc(g.phone||'')}</div><div><b>E-mail:</b> ${esc(g.email||'')}</div><div><b>CPF:</b> ${esc(g.document||'')}</div><div><b>Hóspedes:</b> ${esc(r.guests_count||'')}</div><div><b>Pagamento:</b> ${esc(r.payment_method||'Aguardando')}</div></div>${r.notes?`<div class="muted" style="margin-top:8px"><b>Observações:</b> ${esc(r.notes)}</div>`:''}<div class="actions">${s==='pending'?`<button class="primary" onclick="confirmReservation('${r.id}','pix')">✓ Confirmar Pix</button><button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar Nubank</button><button class="danger" onclick="rejectReservation('${r.id}')">Recusar</button>`:''}${s==='confirmed'?`<button class="danger" onclick="cancelReservation('${r.id}')">Cancelar reserva</button><button class="danger-outline" onclick="deleteReservation('${r.id}')">🗑 Excluir</button>`:''}${(s==='cancelled'||s==='rejected')?`<button class="danger-outline" onclick="deleteReservation('${r.id}')">🗑 Excluir registro</button>`:''}</div></div>`}
-async function confirmReservation(id,method){if(!confirm('Confirmar pagamento e bloquear as datas?'))return;try{await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'confirmed',payment_method:method})});show('✅ Reserva confirmada.','ok');await showReservations()}catch(e){show('❌ '+e.message,'err')}}
-async function rejectReservation(id){if(!confirm('Recusar esta solicitação? As datas continuarão disponíveis.'))return;try{await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'rejected'})});show('Solicitação cancelada.','ok');await showReservations()}catch(e){show('❌ '+e.message,'err')}}
-async function cancelReservation(id){if(!confirm('Cancelar esta reserva confirmada? As datas serão liberadas.'))return;try{await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({reservation_id:id,status:'cancelled'})});show('Reserva cancelada e datas liberadas.','ok');await showReservations()}catch(e){show('❌ '+e.message,'err')}}
-async function deleteReservation(id){if(!confirm('Excluir permanentemente este registro de reserva?'))return;try{await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});show('🗑 Registro excluído.','ok');await showReservations()}catch(e){show('❌ '+e.message,'err')}}
-function logout(){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();$('status').textContent='Aguardando login'}
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function newLoft(){
+ document.getElementById('modalTitle').textContent='Novo apartamento';
+ ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ openModal();
+}
+function editLoft(l){
+ document.getElementById('modalTitle').textContent='Editar apartamento';
+ document.getElementById('loftId').value=l.id||'';
+ document.getElementById('name').value=l.name||'';
+ document.getElementById('description').value=l.description||'';
+ document.getElementById('location').value=l.location||'';
+ document.getElementById('maxGuests').value=l.max_guests||2;
+ const p=(data.prices||[]).find(x=>x.loft_id===l.id);
+ document.getElementById('price').value=p?Number(p.nightly_price ?? p.price ?? 0):0;
+ document.getElementById('cleaning').value=l.cleaning_fee??150;
+ document.getElementById('airbnbUrl').value=l.airbnb_url||'';
+ document.getElementById('icalUrl').value='';
+ openModal();
+}
+async function saveLoft(ev){
+ ev.preventDefault();
+ const id=document.getElementById('loftId').value;
+ const body={
+  loft_id:id||null,name:document.getElementById('name').value.trim(),
+  description:document.getElementById('description').value.trim(),
+  location:document.getElementById('location').value.trim(),
+  max_guests:Number(document.getElementById('maxGuests').value||2),
+  cleaning_fee:Number(document.getElementById('cleaning').value||0),
+  airbnb_url:document.getElementById('airbnbUrl').value.trim()
+ };
+ try{
+  const r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});
+  const loftId=r.loft?.id||r.id||id;
+  const price=Number(document.getElementById('price').value||0);
+  if(loftId && Number.isFinite(price) && price>=0)
+    await api('/admin/price',{method:'POST',body:JSON.stringify({loft_id:loftId,nightly_price:price})});
+  const ical=document.getElementById('icalUrl').value.trim();
+  if(ical && loftId){
+    await api('/admin/channel-calendar',{method:'POST',body:JSON.stringify({loft_id:loftId,channel:'Airbnb',calendar_url:ical})});
+  }
+  closeModal();show(id?'✅ Alterações salvas no banco.':'✅ Apartamento criado e salvo no banco.','ok');await loadData();
+ }catch(e){show('❌ '+e.message,'err','formNotice')}
+}
+function importAirbnb(){
+ document.getElementById('modalTitle').textContent='Importar anúncio do Airbnb';
+ ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('airbnbUrl').focus();
+ document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
+ openModal();
+}
+let photoLoftId='';
+function openPhotos(id){
+ photoLoftId=id;
+ const loft=(data.lofts||[]).find(x=>x.id===id);
+ document.getElementById('photoFile').value='';
+ renderPhotos(loft?.photos||[]);
+ document.getElementById('photoModal').classList.add('open');
+}
+function closePhotoModal(){document.getElementById('photoModal').classList.remove('open')}
+function renderPhotos(photos){
+ const arr=Array.isArray(photos)?photos:[];
+ document.getElementById('photoGrid').innerHTML=arr.length?arr.map((url,i)=>`<div class="photo-item" draggable="true" data-photo-index="${i}"><span class="photo-order">${i+1}</span><img src="${esc(url)}" alt="Foto ${i+1}"><button onclick='deletePhoto(${JSON.stringify(url)})'>Excluir</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Nenhuma foto cadastrada.</div>';
+ initPhotoDrag();
+}
+
+let photoDragIndex=null;
+let photoTouchIndex=null;
+let photoTouchTimer=null;
+let photoTouchActive=false;
+
+function photoItems(){return [...document.querySelectorAll('#photoGrid .photo-item')];}
+function clearPhotoDragStyles(){photoItems().forEach(x=>x.classList.remove('dragging','drag-over'));}
+function applyPhotoOrder(from,to){
+ if(from===null||to===null||from===to)return;
+ const loft=(data.lofts||[]).find(x=>x.id===photoLoftId); if(!loft)return;
+ const arr=Array.isArray(loft.photos)?[...loft.photos]:[];
+ if(from<0||to<0||from>=arr.length||to>=arr.length)return;
+ const [moved]=arr.splice(from,1); arr.splice(to,0,moved);
+ loft.photos=arr;
+ renderPhotos(arr);
+ savePhotoOrder(arr);
+}
+async function savePhotoOrder(arr){
+ try{
+  const j=await api('/admin/loft',{method:'POST',body:JSON.stringify({loft_id:photoLoftId,photos:arr})});
+  const loft=(data.lofts||[]).find(x=>x.id===photoLoftId); if(loft)loft.photos=j.loft?.photos||j.photos||arr;
+  renderPhotos(loft?.photos||arr);
+  show('✅ Ordem das fotos salva.','ok','photoNotice');
+ }catch(e){show('❌ Não foi possível salvar a ordem: '+e.message,'err','photoNotice');}
+}
+function initPhotoDrag(){
+ const items=photoItems();
+ items.forEach((el,i)=>{
+  el.addEventListener('dragstart',e=>{photoDragIndex=i;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+  el.addEventListener('dragover',e=>{e.preventDefault();clearPhotoDragStyles();el.classList.add('drag-over');});
+  el.addEventListener('drop',e=>{e.preventDefault();const to=Number(el.dataset.photoIndex);clearPhotoDragStyles();applyPhotoOrder(photoDragIndex,to);photoDragIndex=null;});
+  el.addEventListener('dragend',()=>{clearPhotoDragStyles();photoDragIndex=null;});
+  el.addEventListener('touchstart',e=>{
+    if(e.target.closest('button'))return;
+    photoTouchIndex=i;photoTouchActive=false;
+    photoTouchTimer=setTimeout(()=>{photoTouchActive=true;el.classList.add('dragging');},180);
+  },{passive:true});
+  el.addEventListener('touchmove',e=>{
+    if(photoTouchIndex===null)return;
+    if(!photoTouchActive)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    const target=document.elementFromPoint(t.clientX,t.clientY)?.closest('.photo-item');
+    clearPhotoDragStyles();el.classList.add('dragging');
+    if(target&&target!==el)target.classList.add('drag-over');
+  },{passive:false});
+  el.addEventListener('touchend',e=>{
+    clearTimeout(photoTouchTimer);
+    if(!photoTouchActive){photoTouchIndex=null;return;}
+    const t=e.changedTouches[0];
+    const target=document.elementFromPoint(t.clientX,t.clientY)?.closest('.photo-item');
+    const to=target?Number(target.dataset.photoIndex):photoTouchIndex;
+    clearPhotoDragStyles();
+    const from=photoTouchIndex;photoTouchIndex=null;photoTouchActive=false;
+    applyPhotoOrder(from,to);
+  });
+  el.addEventListener('touchcancel',()=>{clearTimeout(photoTouchTimer);clearPhotoDragStyles();photoTouchIndex=null;photoTouchActive=false;});
+ });
+}
+async function uploadPhoto(){
+ const file=document.getElementById('photoFile').files[0];
+ if(!file){show('Selecione uma foto.','err','photoNotice');return}
+ try{
+  const fd=new FormData();fd.append('loft_id',photoLoftId);fd.append('file',file);
+  const r=await fetch(WORKER+'/admin/photo',{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+  const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
+  if(!r.ok||j.ok===false)throw new Error(j.error||('HTTP '+r.status));
+  const loft=(data.lofts||[]).find(x=>x.id===photoLoftId);if(loft)loft.photos=j.photos||[];
+  renderPhotos(j.photos||[]);render();show('✅ Foto adicionada.','ok','photoNotice');
+ }catch(e){show('❌ '+e.message,'err','photoNotice')}
+}
+async function deletePhoto(url){
+ if(!confirm('Excluir esta foto?'))return;
+ try{const j=await api('/admin/photo',{method:'DELETE',body:JSON.stringify({loft_id:photoLoftId,url})});const loft=(data.lofts||[]).find(x=>x.id===photoLoftId);if(loft)loft.photos=j.photos||[];renderPhotos(j.photos||[]);render();}catch(e){show('❌ '+e.message,'err','photoNotice')}
+}
+
+let calendarLoftId='';let calendarMonth=new Date();
+let calendarBlocked=[];
+function openCalendar(id){calendarLoftId=id;calendarMonth=new Date();document.getElementById('calendarModal').classList.add('open');loadAdminCalendar();}
+function closeCalendarModal(){document.getElementById('calendarModal').classList.remove('open')}
+function changeCalendarMonth(delta){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+delta,1);loadAdminCalendar()}
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function formatBRDate(k){return k.split('-').reverse().join('/')}
+async function loadAdminCalendar(){
+ const loft=(data.lofts||[]).find(x=>x.id===calendarLoftId);
+ document.getElementById('calendarModalTitle').textContent='Calendário — '+(loft?.name||'Loft');
+ document.getElementById('calendarTitle').textContent=calendarMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
+ const start=new Date(y,m,1);const end=new Date(y,m+1,1);
+ calendarBlocked=[];
+ try{
+  const r=await fetch(WORKER+'/availability?loft_id='+encodeURIComponent(calendarLoftId)+'&start='+dateKey(start)+'&end='+dateKey(end),{cache:'no-store'});
+  const j=await r.json();if(r.ok&&j.ok)calendarBlocked=j.blocked||[];
+ }catch{}
+ renderAdminCalendar();
+}
+function isBlockedAdmin(k){return calendarBlocked.some(x=>x.start_date&&x.end_date&&k>=x.start_date&&k<x.end_date)}
+function dailyPriceFor(k){const x=(data.daily_prices||[]).find(p=>p.loft_id===calendarLoftId&&p.date===k);return x?Number(x.price):null}
+function renderAdminCalendar(){
+ const grid=document.getElementById('calendarGrid');
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
+ const names=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+ let html=names.map(n=>`<div class="calendar-dow">${n}</div>`).join('');
+ const first=new Date(y,m,1).getDay();const days=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++)html+='<div></div>';
+ for(let d=1;d<=days;d++){
+  const dt=new Date(y,m,d);const k=dateKey(dt);const blocked=isBlockedAdmin(k);const dp=dailyPriceFor(k);
+  html+=`<div class="day ${blocked?'blocked':''} ${dp!==null?'has-price':''}" ${blocked?'title="Bloqueado"':'onclick="editDailyPrice(\''+k+'\')"'}><div class="day-num">${d}</div><div class="day-price">${dp!==null?'R$ '+dp.toFixed(0):''}</div></div>`;
+ }
+ grid.innerHTML=html;
+}
+async function editDailyPrice(k){
+ if(isBlockedAdmin(k)){show('Esta data está bloqueada e não pode receber preço especial.','err','calendarNotice');return}
+ const current=dailyPriceFor(k);
+ const loft=(data.lofts||[]).find(x=>x.id===calendarLoftId);
+ const base=(data.prices||[]).find(x=>x.loft_id===calendarLoftId);
+ const value=prompt('Preço da diária em '+formatBRDate(k)+' (deixe vazio para remover o preço especial):',current!==null?String(current):String(base?.nightly_price??0));
+ if(value===null)return;
+ try{
+  if(value.trim()===''){
+   await api('/admin/daily-price?loft_id='+encodeURIComponent(calendarLoftId)+'&date='+encodeURIComponent(k),{method:'DELETE'});
+  }else{
+   const price=Number(value.replace(',','.'));if(!Number.isFinite(price)||price<0)throw new Error('Preço inválido.');
+   await api('/admin/daily-price',{method:'POST',body:JSON.stringify({loft_id:calendarLoftId,date:k,price})});
+  }
+  const j=await api('/admin/data');data=j;render();await loadAdminCalendar();show('✅ Calendário atualizado.','ok','calendarNotice');
+ }catch(e){show('❌ '+e.message,'err','calendarNotice')}
+}
+
+async function showReservations(){
+ try{
+  const j=await api('/admin/reservations');
+  reservations=j.reservations||[];
+  const panel=document.getElementById('reservationsPanel');
+  if(!reservations.length){
+    panel.innerHTML='<div class="card"><h2>Solicitações de reserva</h2><div class="empty">Nenhuma solicitação encontrada.</div></div>';
+    return;
+  }
+  panel.innerHTML=`<div class="card">
+    <h2>Solicitações de reserva</h2>
+    <div class="muted" style="margin-bottom:12px">Somente reservas com status <b>confirmada</b> bloqueiam as datas.</div>
+    ${reservations.map(renderReservation).join('')}
+  </div>`;
+ }catch(e){show('❌ '+e.message,'err')}
+}
+
+function renderReservation(r){
+ const guest=r.guests||{};
+ const loft=r.lofts||{};
+ const status=r.status||'pending';
+ const statusLabel={pending:'Pendente',confirmed:'Confirmada',rejected:'Recusada',cancelled:'Recusada'}[status]||status;
+ const method=r.payment_method||'';
+ const total=Number(r.total_amount||0).toFixed(2).replace('.',',');
+ const ci=r.check_in?String(r.check_in).split('-').reverse().join('/'):''; 
+ const co=r.check_out?String(r.check_out).split('-').reverse().join('/'):'';
+ return `<div class="reservation ${esc(status)}">
+   <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+    <div><b>#${esc(r.id||'')}</b> · <span class="badge">${esc(statusLabel)}</span></div>
+    <b>R$ ${total}</b>
+   </div>
+   <div class="reservation-grid" style="margin-top:10px">
+    <div><b>Loft:</b> ${esc(loft.name||r.loft_id||'')}</div>
+    <div><b>Período:</b> ${esc(ci)} → ${esc(co)}</div>
+    <div><b>Hóspede:</b> ${esc(guest.name||'')}</div>
+    <div><b>WhatsApp:</b> ${esc(guest.phone||'')}</div>
+    <div><b>E-mail:</b> ${esc(guest.email||'')}</div>
+    <div><b>CPF:</b> ${esc(guest.document||'')}</div>
+    <div><b>Hóspedes:</b> ${esc(r.guests_count||'')}</div>
+    <div><b>Pagamento:</b> ${esc(method||'Aguardando')}</div>
+   </div>
+   ${r.notes?`<div class="muted" style="margin-top:8px"><b>Observações:</b> ${esc(r.notes)}</div>`:''}
+   ${guest.phone?`<div class="actions"><button class="secondary" onclick='openGuestWhatsApp(${JSON.stringify(guest.phone)},${JSON.stringify(r.id)},${JSON.stringify(loft.name||'Loft')})'>💬 WhatsApp do hóspede</button></div>`:''}
+   ${status==='pending'?`<div class="actions">
+     <button class="primary" onclick="confirmReservation('${r.id}','pix')">✓ Confirmar — Pix</button>
+     <button class="primary" onclick="confirmReservation('${r.id}','nubank')">✓ Confirmar — Nubank</button>
+     <button class="danger" onclick="rejectReservation('${r.id}')">Recusar</button>
+   </div>`:status==='confirmed'?`<div class="actions"><button class="danger" onclick="deleteReservation('${r.id}')">Excluir reserva</button></div>`:status==='cancelled'||status==='rejected'?`<div class="actions"><button class="danger" onclick="deleteReservation('${r.id}')">Excluir registro</button></div>`:''}
+ </div>`;
+}
+
+async function confirmReservation(id,method){
+ if(!confirm('Confirma que o pagamento foi recebido e deseja bloquear estas datas?')) return;
+ try{
+  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({id,status:'confirmed',payment_method:method})});
+  show('✅ Reserva confirmada. As datas agora ficam bloqueadas.','ok');
+  await showReservations();
+ }catch(e){show('❌ '+e.message,'err')}
+}
+
+async function rejectReservation(id){
+ if(!confirm('Recusar esta solicitação? As datas continuarão disponíveis.')) return;
+ try{
+  await api('/admin/reservation',{method:'PATCH',body:JSON.stringify({id,status:'rejected'})});
+  show('Solicitação recusada.','ok');
+  await showReservations();
+ }catch(e){show('❌ '+e.message,'err')}
+}
+
+async function deleteReservation(id){
+ if(!confirm('Excluir definitivamente esta reserva do banco de dados?')) return;
+ try{await api('/admin/reservation?id='+encodeURIComponent(id),{method:'DELETE'});show('Reserva excluída.','ok');await showReservations();}
+ catch(e){show('❌ '+e.message,'err')}
+}
+
+function openGuestWhatsApp(phone,id,loft){
+ const digits=String(phone||'').replace(/\D/g,'');
+ if(!digits)return;
+ const msg=`Olá! Sobre a solicitação de reserva ${id} do ${loft}. Vou lhe orientar sobre o pagamento.`;
+ window.open('https://wa.me/55'+digits+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+function logout(){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();document.getElementById('status').textContent='Aguardando login';}
 loadData();
 </script>
 </body></html>
