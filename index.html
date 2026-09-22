@@ -566,6 +566,15 @@ document.addEventListener('click',function(e){
   reserve();
 });
 
+function sendReservationWhatsApp(waText){
+  const btn=$('sendWhatsAppBtn');
+  const msg=$('whatsappRequiredMsg');
+  if(btn) btn.disabled=true;
+  if(msg) msg.innerHTML='✅ Abrindo o WhatsApp para você enviar a confirmação...';
+  const url='https://wa.me/5551985189380?text='+waText;
+  window.location.href=url;
+}
+
 async function submitReservation(){
   const btn=$('r_btn'), msg=$('r_msg');
   const name=$('r_name').value.trim(), email=$('r_email').value.trim(), phone=$('r_phone').value.trim(), document=$('r_doc').value.trim();
@@ -586,7 +595,7 @@ async function submitReservation(){
       <div class="booking-success">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Pré-reserva recebida!</h2>
-        <p class="success-sub">Seus dados foram registrados e as datas foram verificadas. Agora você pode seguir para o pagamento ou falar conosco pelo WhatsApp.</p>
+        <p class="success-sub"><b>Última etapa obrigatória:</b> para concluir sua solicitação de reserva, envie a confirmação pelo WhatsApp. A reserva só será considerada confirmada após nossa confirmação pelo WhatsApp.</p>
         <div class="success-card">
           <div class="srow"><span>Reserva</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
@@ -594,10 +603,12 @@ async function submitReservation(){
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
         </div>
         <div class="success-actions">
-          <button class="btn" onclick="window.open('https://wa.me/5551985189380?text=${waText}','_blank')">Falar pelo WhatsApp</button>
+          <button class="btn" id="sendWhatsAppBtn" onclick="sendReservationWhatsApp('${waText}')">📲 ENVIAR CONFIRMAÇÃO PELO WHATSAPP</button>
+        </div>
+        <div id="whatsappRequiredMsg" class="success-note" style="margin-top:10px">⚠️ <b>Obrigatório:</b> toque no botão acima para enviar a solicitação pelo WhatsApp. Sem essa confirmação, a solicitação não será finalizada.</div>
+        <div class="success-actions" style="margin-top:10px">
           <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
         </div>
-        <div class="success-note">Pagamento online será conectado na próxima etapa. Guarde o número da reserva para atendimento.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
