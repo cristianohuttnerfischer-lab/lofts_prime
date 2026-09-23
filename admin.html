@@ -34,7 +34,15 @@ textarea{min-height:90px;resize:vertical}
 @media(max-width:700px){.reservation-grid{grid-template-columns:1fr}}
 
 
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc;cursor:grab;touch-action:none;user-select:none}.photo-item:active{cursor:grabbing}.photo-item.dragging{opacity:.45;transform:scale(.98)}.photo-item.drag-over{outline:3px solid #111827;outline-offset:2px}.photo-order{position:absolute;left:6px;top:6px;padding:5px 8px;border-radius:999px;background:#111827;color:#fff;font-size:11px;font-weight:800;z-index:2}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b;z-index:3}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc;cursor:grab;touch-action:none;user-select:none}.photo-item:active{cursor:grabbing}.photo-item.dragging{opacity:.45;transform:scale(.98)}.photo-item.drag-over{outline:3px solid #111827;outline-offset:2px}.photo-order{position:absolute;left:6px;top:6px;padding:5px 8px;border-radius:999px;background:#111827;color:#fff;font-size:11px;font-weight:800;z-index:2}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b;z-index:3}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.price-tools{margin-top:16px;padding:14px;border:1px solid #e2e6ec;border-radius:12px;background:#fafbfc}
+.price-tools h3{margin:0 0 5px;font-size:16px}.price-tools .hint{margin:0 0 12px}
+.price-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.price-tools-grid .full{grid-column:1/-1}
+.price-tools .actions{margin-top:10px}
+.price-list{margin-top:14px;display:grid;gap:7px;max-height:220px;overflow:auto}
+.price-rule{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 10px;background:#fff;border:1px solid #e2e6ec;border-radius:9px;font-size:12px}
+.price-rule b{font-size:12px}.price-rule .remove{padding:5px 8px}
+@media(max-width:520px){.price-tools-grid{grid-template-columns:1fr}}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
 
 .login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
 </style>
@@ -103,7 +111,30 @@ textarea{min-height:90px;resize:vertical}
  <div class="calendar-head"><button class="secondary" onclick="changeCalendarMonth(-1)">‹</button><div id="calendarTitle" class="calendar-title"></div><button class="secondary" onclick="changeCalendarMonth(1)">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
  <div class="calendar-legend"><span><i class="dot free"></i>Disponível</span><span><i class="dot block"></i>Bloqueado</span><span><i class="dot price"></i>Preço especial</span></div>
- <p class="muted">Toque em uma data disponível para cadastrar/alterar o preço daquela diária. Deixe em branco para usar a diária padrão.</p>
+ <p class="muted">Toque em uma data para alterar o preço daquele dia. Para vários dias, use a ferramenta abaixo.</p>
+
+ <div class="price-tools">
+   <h3>💰 Preço por período</h3>
+   <p class="muted hint">Defina um preço especial ou aplique desconto a todas as noites do período.</p>
+   <div class="price-tools-grid">
+     <div><label>De</label><input id="periodStart" type="date"></div>
+     <div><label>Até</label><input id="periodEnd" type="date"></div>
+     <div><label>Tipo</label>
+       <select id="periodType">
+         <option value="fixed">Preço fixo por noite</option>
+         <option value="discount">Desconto percentual</option>
+       </select>
+     </div>
+     <div><label id="periodValueLabel">Valor</label><input id="periodValue" type="number" min="0" step="0.01" placeholder="Ex.: 280 ou 10"></div>
+     <div class="full muted" id="periodPreview"></div>
+   </div>
+   <div class="actions">
+     <button class="primary" onclick="applyPeriodPrice()">Aplicar ao período</button>
+     <button class="secondary" onclick="clearPeriodFields()">Limpar</button>
+   </div>
+   <div id="periodRules" class="price-list"></div>
+ </div>
+
  <div class="actions"><button class="secondary" onclick="closeCalendarModal()">Fechar</button></div>
 </div></div>
 
@@ -325,7 +356,16 @@ async function deletePhoto(url){
 
 let calendarLoftId='';let calendarMonth=new Date();
 let calendarBlocked=[];
-function openCalendar(id){calendarLoftId=id;calendarMonth=new Date();document.getElementById('calendarModal').classList.add('open');loadAdminCalendar();}
+function openCalendar(id){
+ calendarLoftId=id;calendarMonth=new Date();
+ document.getElementById('calendarModal').classList.add('open');
+ const s=document.getElementById('periodStart'),e=document.getElementById('periodEnd');
+ const now=dateKey(new Date());
+ if(s&&!s.value)s.value=now;
+ if(e&&!e.value)e.value=now;
+ ['periodStart','periodEnd','periodType','periodValue'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePeriodPreview));
+ loadAdminCalendar();
+}
 function closeCalendarModal(){document.getElementById('calendarModal').classList.remove('open')}
 function changeCalendarMonth(delta){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+delta,1);loadAdminCalendar()}
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -358,6 +398,105 @@ function renderAdminCalendar(){
  }
  grid.innerHTML=html;
 }
+
+function getPeriodDates(start,end){
+ const out=[];
+ if(!start||!end)return out;
+ let d=new Date(start+'T12:00:00');
+ const last=new Date(end+'T12:00:00');
+ if(d>last)return out;
+ while(d<=last){
+   out.push(dateKey(d));
+   d.setDate(d.getDate()+1);
+ }
+ return out;
+}
+function updatePeriodPreview(){
+ const s=document.getElementById('periodStart')?.value||'';
+ const e=document.getElementById('periodEnd')?.value||'';
+ const type=document.getElementById('periodType')?.value||'fixed';
+ const v=Number(document.getElementById('periodValue')?.value||0);
+ const preview=document.getElementById('periodPreview');
+ if(!preview)return;
+ const dates=getPeriodDates(s,e);
+ if(!dates.length){preview.textContent='Selecione um período válido.';return}
+ const blocked=dates.filter(k=>isBlockedAdmin(k));
+ const available=dates.length-blocked.length;
+ const base=Number((data.prices||[]).find(x=>x.loft_id===calendarLoftId)?.nightly_price||0);
+ let final=type==='discount'?base*(1-v/100):v;
+ final=Math.max(0,final);
+ preview.textContent=`${dates.length} noite(s) selecionada(s) · ${available} disponível(is) · ${blocked.length} bloqueada(s) · preço aplicado: R$ ${final.toFixed(2).replace('.',',')}/noite`;
+}
+function clearPeriodFields(){
+ const s=document.getElementById('periodStart'),e=document.getElementById('periodEnd'),v=document.getElementById('periodValue');
+ if(s)s.value='';if(e)e.value='';if(v)v.value='';
+ updatePeriodPreview();
+}
+async function applyPeriodPrice(){
+ const start=document.getElementById('periodStart').value;
+ const end=document.getElementById('periodEnd').value;
+ const type=document.getElementById('periodType').value;
+ const raw=document.getElementById('periodValue').value;
+ const value=Number(String(raw).replace(',','.'));
+ if(!start||!end) return show('Informe as datas inicial e final.','err','calendarNotice');
+ if(start>end) return show('A data inicial não pode ser maior que a final.','err','calendarNotice');
+ if(!Number.isFinite(value)||value<0) return show('Informe um valor válido.','err','calendarNotice');
+ if(type==='discount' && value>100) return show('O desconto deve estar entre 0% e 100%.','err','calendarNotice');
+
+ const dates=getPeriodDates(start,end);
+ const blocked=dates.filter(isBlockedAdmin);
+ const available=dates.filter(k=>!isBlockedAdmin(k));
+ if(!available.length) return show('Não há datas disponíveis nesse período para alterar o preço.','err','calendarNotice');
+
+ const base=Number((data.prices||[]).find(x=>x.loft_id===calendarLoftId)?.nightly_price||0);
+ const finalPrice=type==='discount' ? Math.max(0,base*(1-value/100)) : value;
+ const rounded=Math.round(finalPrice*100)/100;
+
+ if(!confirm(`Aplicar R$ ${rounded.toFixed(2).replace('.',',')} por noite em ${available.length} noite(s)?${blocked.length?` ${blocked.length} data(s) bloqueada(s) serão ignoradas.`:''}`)) return;
+
+ const btn=document.querySelector('.price-tools .primary');
+ if(btn)btn.disabled=true;
+ try{
+   let done=0;
+   for(const k of available){
+     await api('/admin/daily-price',{method:'POST',body:JSON.stringify({loft_id:calendarLoftId,date:k,price:rounded})});
+     done++;
+   }
+   const j=await api('/admin/data'); data=j; render();
+   await loadAdminCalendar();
+   clearPeriodFields();
+   show(`✅ Preço aplicado em ${done} noite(s).`,'ok','calendarNotice');
+ }catch(e){
+   show(`❌ Falha após ${0} alteração(ões): ${e.message}`,'err','calendarNotice');
+ }finally{
+   if(btn)btn.disabled=false;
+ }
+}
+function renderPeriodRules(){
+ const el=document.getElementById('periodRules');
+ if(!el)return;
+ const arr=(data.daily_prices||[])
+   .filter(x=>x.loft_id===calendarLoftId)
+   .filter(x=>x.date)
+   .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ if(!arr.length){el.innerHTML='<div class="muted">Nenhum preço especial cadastrado para este loft.</div>';return}
+ const visible=arr.filter(x=>{
+   const d=new Date(String(x.date)+'T12:00:00');
+   const m=calendarMonth.getMonth(), y=calendarMonth.getFullYear();
+   return d.getFullYear()===y && d.getMonth()===m;
+ });
+ if(!visible.length){el.innerHTML='<div class="muted">Nenhum preço especial neste mês.</div>';return}
+ el.innerHTML=visible.map(x=>`<div class="price-rule"><span><b>${formatBRDate(x.date)}</b> · R$ ${Number(x.price).toFixed(2).replace('.',',')}</span><button class="secondary remove" onclick="deleteDailyPrice('${x.date}')">Excluir</button></div>`).join('');
+}
+async function deleteDailyPrice(k){
+ if(!confirm(`Remover o preço especial de ${formatBRDate(k)} e voltar à diária padrão?`))return;
+ try{
+   await api('/admin/daily-price?loft_id='+encodeURIComponent(calendarLoftId)+'&date='+encodeURIComponent(k),{method:'DELETE'});
+   const j=await api('/admin/data');data=j;render();await loadAdminCalendar();
+   show('✅ Preço especial removido.','ok','calendarNotice');
+ }catch(e){show('❌ '+e.message,'err','calendarNotice')}
+}
+
 async function editDailyPrice(k){
  if(isBlockedAdmin(k)){show('Esta data está bloqueada e não pode receber preço especial.','err','calendarNotice');return}
  const current=dailyPriceFor(k);
