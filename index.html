@@ -647,7 +647,7 @@ async function submitReservation(){
       <div class="booking-success">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Solicitação enviada!</h2>
-        <p class="success-sub">Sua solicitação foi registrada como <b>pendente</b>. As datas ainda não foram bloqueadas. Enviaremos todos os dados pelo WhatsApp para combinar o pagamento.</p>
+        <p class="success-sub">Sua solicitação foi registrada como <b>pendente</b>. As datas ainda não foram bloqueadas. <b>Para concluir a solicitação, envie a mensagem pelo WhatsApp.</b> Você receberá o link de pagamento pelo próprio WhatsApp.</p>
         <div class="success-card">
           <div class="srow"><span>Solicitação</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
@@ -656,10 +656,10 @@ async function submitReservation(){
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
         </div>
         <div class="success-actions">
-          <button class="btn" onclick="window.open('${waUrl}','_blank')">Enviar dados pelo WhatsApp</button>
-          <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
+          <button id="waConfirmBtn" class="btn" onclick="confirmWhatsAppAndFinish('${waUrl}')">📲 ENVIAR CONFIRMAÇÃO PELO WHATSAPP</button>
+          <button id="backAfterWa" class="btn secondary" style="display:none" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
         </div>
-        <div class="success-note">A reserva só será confirmada e as datas bloqueadas depois que você receber o pagamento e confirmar no painel administrativo.</div>
+        <div id="waRequiredNote" class="success-note"><b>Importante:</b> o envio desta mensagem pelo WhatsApp é obrigatório para concluir a solicitação. Depois, você receberá pelo WhatsApp o link para pagamento.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
@@ -667,6 +667,19 @@ async function submitReservation(){
     btn.disabled=false; btn.textContent='Solicitar reserva';
   }
 }
+
+function confirmWhatsAppAndFinish(url){
+  const btn=$('waConfirmBtn');
+  if(!btn)return;
+  window.open(url,'_blank');
+  btn.textContent='✓ CONFIRMAÇÃO ENVIADA PELO WHATSAPP';
+  btn.disabled=true;
+  btn.style.opacity='.75';
+  const back=$('backAfterWa');
+  if(back) back.style.display='block';
+  const note=$('waRequiredNote');
+  if(note) note.innerHTML='<b>Solicitação concluída.</b> Você receberá o link de pagamento pelo WhatsApp. A reserva só será confirmada e as datas bloqueadas após o pagamento e a confirmação no painel administrativo.';
+} 
 
 function goHome(){$('detail').style.display='none';$('home').style.display='block';window.scrollTo(0,0)}
 render(P);
