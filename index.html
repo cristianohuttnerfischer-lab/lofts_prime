@@ -123,10 +123,7 @@ main{padding-bottom:80px}.hero{min-height:760px;position:relative;display:flex;a
 
   <div class="box"><h3 style="margin:0 0 12px">Escolha suas datas</h3><div class="grid"><div class="field"><div class="label">Check-in</div><input id="cin" class="input" type="date"></div><div class="field"><div class="label">Check-out</div><input id="cout" class="input" type="date"></div></div><div id="calendar" class="calendar"><div class="cal-head"><button type="button" class="cal-nav" id="calPrev" aria-label="Mês anterior">‹</button><div id="calTitle" class="cal-title"></div><button type="button" class="cal-nav" id="calNext" aria-label="Próximo mês">›</button></div><div class="cal-week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div id="calDays" class="cal-days"></div><div class="cal-legend"><span><span class="legend-dot legend-red"></span>Ocupado</span><span><span class="legend-dot legend-green"></span>Disponível</span></div><div id="calMsg" class="calendar-msg">Consultando calendário...</div></div>
   <div class="summary"><div class="line"><span id="nights">0 noites</span><span id="stay">R$ 0</span></div><div class="line"><span>Limpeza</span><span id="fee">R$ 0</span></div><div class="total"><span>Total</span><span id="tot">R$ 0</span></div><div id="availability" class="small" style="margin-top:10px;line-height:1.4"></div></div><button class="btn" onclick="reserve()">Continuar para reserva</button></div>
-  <section id="airbnbSection" class="airbnb-modern" style="display:none"><div class="airbnb-kicker">TAMBÉM NO AIRBNB</div><h3>Veja o anúncio completo</h3><p>Confira fotos, avaliações e informações do anúncio no Airbnb.</p><div id="airbnbEmbed" class="airbnb-frame-wrap">
-<div class="airbnb-slot" data-loft="canoas1"><div class="airbnb-embed-frame" data-id="1234716769928608285" data-view="home" data-hide-price="true" style="width:450px;height:300px;margin:auto"><a href="https://www.airbnb.com.br/rooms/1234716769928608285?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget">Ver no Airbnb</a><a href="https://www.airbnb.com.br/rooms/1234716769928608285?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget" rel="nofollow">Loft · Canoas · ★5,0 · 1 quarto · 1 cama · 1 banheiro</a></div></div>
-<div class="airbnb-slot" data-loft="canoas2" style="display:none"><div class="airbnb-embed-frame" data-id="1529653927433325285" data-view="home" data-hide-price="true" style="width:450px;height:300px;margin:auto"><a href="https://www.airbnb.com.br/rooms/1529653927433325285?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget">Ver no Airbnb</a><a href="https://www.airbnb.com.br/rooms/1529653927433325285?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget" rel="nofollow">Loft · Canoas · ★5,0 · 1 quarto · 1 cama · 1 banheiro</a></div></div>
-<div class="airbnb-slot" data-loft="canela" style="display:none"><div class="airbnb-embed-frame" data-id="1760975750597302326" data-view="home" data-hide-price="true" style="width:450px;height:300px;margin:auto"><a href="https://www.airbnb.com.br/rooms/1760975750597302326?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget">Ver no Airbnb</a><a href="https://www.airbnb.com.br/rooms/1760975750597302326?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget" rel="nofollow">Loft · Canela · ★Novidade · 1 quarto · 2 camas · 1 banheiro</a></div></div></div><a id="airbnbDirect" class="airbnb-direct" href="#" target="_blank" rel="noopener">↗ Ver anúncio completo no Airbnb</a></section>
+  <section id="airbnbSection" class="airbnb-modern" style="display:none"><div class="airbnb-kicker">TAMBÉM NO AIRBNB</div><h3>Veja o anúncio completo</h3><p>Confira fotos, avaliações e informações do anúncio no Airbnb.</p><div id="airbnbEmbed" class="airbnb-frame-wrap"></div><a id="airbnbDirect" class="airbnb-direct" href="#" target="_blank" rel="noopener">↗ Ver anúncio completo no Airbnb</a></section>
 </div>
 <div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
 <div id="lb" class="lb"><button class="x" onclick="closeLB()">✕</button><button class="l" onclick="move(-1)">‹</button><img id="lbi"><button class="r" onclick="move(1)">›</button><div id="count" class="count"></div></div>
@@ -159,67 +156,61 @@ function normalizePublicData(raw){
 async function loadPublicData(){
   try{
     const r=await fetch(`${WORKER_URL}/public/data?ts=${Date.now()}`,{
-      method:'GET',
-      cache:'no-store',
-      headers:{'Accept':'application/json'}
+      method:'GET',cache:'no-store',headers:{'Accept':'application/json'}
     });
     const raw=await r.json();
     if(!r.ok || raw.ok!==true) throw new Error(raw.error||`HTTP ${r.status}`);
     const data=normalizePublicData(raw);
     const priceMap=Object.fromEntries(data.prices.map(x=>[x.loft_id,Number(x.nightly_price ?? x.price ?? 0)]));
 
-    const dbToLocal={};
-    Object.entries(LOFT_UUIDS).forEach(([localId,dbId])=>dbToLocal[dbId]=localId);
+    // O banco é a fonte oficial da publicação. O array P continua apenas como
+    // modelo/fallback de conteúdo para os anúncios antigos.
+    // Assim, se um anúncio antigo for desativado no banco, ele não volta a ser
+    // exibido só porque existe no HTML antigo.
+    const baseForDb=(db)=>{
+      const dbId=String(db.id||'');
+      const air=String(db.airbnb_url||'').trim();
+      return P.find(base=>{
+        const mapped=LOFT_UUIDS[base.id];
+        if(mapped && mapped===dbId) return true;
+        const baseAir=String(base.airbnb_url||'').trim();
+        return !!air && !!baseAir && air.replace(/\/$/,'')===baseAir.replace(/\/$/,'');
+      }) || null;
+    };
 
-    const merged=P.map(base=>{
-      const dbId=LOFT_UUIDS[base.id];
-      const db=data.lofts.find(x=>x.id===dbId);
-      if(!db) return base;
+    const fromDb=data.lofts.filter(db=>db && db.id && db.active!==false).map(db=>{
+      const base=baseForDb(db);
+      const dbId=db.id;
       const daily=data.daily_prices.filter(x=>x.loft_id===dbId).map(x=>({
         date:x.date ?? x.price_date ?? x.date_key,
         price:Number(x.price ?? x.nightly_price ?? 0)
       }));
       return {
-        ...base,
+        ...(base||{}),
+        id:base?.id || `db-${dbId}`,
         dbId,
-        title:db.name ?? base.title,
-        city:db.location ?? base.city,
-        description:db.description ?? base.description,
-        max_guests:Number(db.max_guests ?? base.max_guests ?? 2),
-        cleaning:Number(db.cleaning_fee ?? base.cleaning ?? 150),
-        rate:Number(priceMap[dbId] ?? base.rate ?? 0),
-        active:db.active!==false,
-        airbnb_url:(String(db.airbnb_url||'').trim() || String(base.airbnb_url||'').trim() || ({canoas1:'https://www.airbnb.com.br/rooms/1234716769928608285',canoas2:'https://www.airbnb.com.br/rooms/1529653927433325285',canela:'https://www.airbnb.com.br/rooms/1760975750597302326'}[base.id]||'')),
-        images:Array.isArray(db.photos) && db.photos.length ? db.photos : base.images,
-        amenities:Array.isArray(db.amenities) ? db.amenities : (base.amenities||[]),
+        title:db.name ?? base?.title ?? 'Loft',
+        city:db.location ?? base?.city ?? '',
+        description:db.description ?? base?.description ?? '',
+        max_guests:Number(db.max_guests ?? base?.max_guests ?? 2),
+        cleaning:Number(db.cleaning_fee ?? base?.cleaning ?? 150),
+        rate:Number(priceMap[dbId] ?? base?.rate ?? 0),
+        active:true,
+        airbnb_url:(String(db.airbnb_url||'').trim() || String(base?.airbnb_url||'').trim()),
+        images:Array.isArray(db.photos) && db.photos.length ? db.photos : (base?.images||[]),
+        amenities:Array.isArray(db.amenities) && db.amenities.length ? db.amenities : (base?.amenities||[]),
         dailyPrices:daily
       };
     });
 
-    if(merged.length) P=merged;
-    if(P[0]?.images?.[0]) $('heroBg').style.backgroundImage=`url("${P[0].images[0]}")`;
-    render(P);
-
-    if(cur){
-      const updated=P.find(x=>x.id===cur.id || x.dbId===cur.dbId);
-      if(updated){
-        cur=updated;
-        updateCityHero(cur.city);
-        $('dt').textContent=cur.title;
-        $('dm').textContent=`📍 ${cur.city} • até ${cur.max_guests||2} hóspedes`;
-        $('dd').textContent=cur.description;
-        $('tags').innerHTML=amenityHtml(cur.amenities,99);
-        const im=cur.images&&cur.images.length?cur.images:[''];
-        $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
-        renderAirbnbEmbed(cur);
-  renderAirbnbEmbed(cur);
-      }
-    }
+    P=fromDb;
+    filterProps();
   }catch(e){
+    // Se o Worker estiver temporariamente indisponível, mantém o conteúdo
+    // estático já embutido na página para não deixar o site vazio.
     console.warn('Falha ao carregar dados públicos do Worker:',e);
   }
 }
-
 let cur=null,pi=0, availabilityRequest=0;
 
 async function supabaseRPC(name, body){
@@ -292,7 +283,7 @@ async function filterProps(){
 
   try{
     const checks=await Promise.all(candidates.map(async p=>{
-      const id=LOFT_UUIDS[p.id];
+      const id=p.dbId || LOFT_UUIDS[p.id];
       if(!id) return {...p,_searchAvailable:false};
       try{
         const r=await fetch(WORKER_URL+'/availability?loft_id='+encodeURIComponent(id)+'&start='+encodeURIComponent(cin)+'&end='+encodeURIComponent(cout),{headers:{'Accept':'application/json'},cache:'no-store'});
@@ -367,10 +358,29 @@ function renderAirbnbEmbed(p){
   const fallback={canoas1:'https://www.airbnb.com.br/rooms/1234716769928608285',canoas2:'https://www.airbnb.com.br/rooms/1529653927433325285',canela:'https://www.airbnb.com.br/rooms/1760975750597302326'};
   const raw=String(p?.airbnb_url||fallback[p?.id]||'').trim();
   const m=raw.match(/\/rooms\/(\d+)/i);
-  if(!m){section.style.display='none';return;}
+  if(!m){section.style.display='none';box.innerHTML='';return;}
   section.style.display='block';
-  box.querySelectorAll('.airbnb-slot').forEach(slot=>slot.style.display=slot.dataset.loft===p.id?'block':'none');
-  direct.href=`https://www.airbnb.com.br/rooms/${m[1]}`;
+  const id=m[1];
+  const link=`https://www.airbnb.com.br/rooms/${id}?guests=1&amp;adults=1&amp;s=66&amp;source=embed_widget`;
+  box.innerHTML=`<div class="airbnb-slot" data-loft-airbnb="${id}"><div class="airbnb-embed-frame" data-id="${id}" data-view="home" data-hide-price="true" style="width:450px;height:300px;max-width:100%;margin:auto"><a href="${link}">Ver no Airbnb</a><a href="${link}" rel="nofollow">Ver anúncio no Airbnb</a></div></div>`;
+  direct.href=`https://www.airbnb.com.br/rooms/${id}`;
+
+  // O widget do Airbnb é criado pelo SDK a partir do bloco .airbnb-embed-frame.
+  // Como esse bloco é inserido depois do carregamento inicial da página,
+  // recarregamos o SDK após cada troca de anúncio para que a caixinha volte a
+  // ser transformada pelo Airbnb, inclusive para anúncios importados novos.
+  setTimeout(()=>{
+    try{
+      if(window.Airbnb && typeof window.Airbnb.init==='function') window.Airbnb.init();
+    }catch(e){}
+    const old=document.querySelector('script[data-lofts-airbnb-sdk="1"]');
+    if(old) old.remove();
+    const sdk=document.createElement('script');
+    sdk.async=true;
+    sdk.dataset.loftsAirbnbSdk='1';
+    sdk.src='https://www.airbnb.com.br/embeddable/airbnb_jssdk';
+    document.head.appendChild(sdk);
+  },80);
 }
 
 function openP(id){
@@ -383,6 +393,7 @@ function openP(id){
   $('dm').textContent=`📍 ${cur.city} • até ${cur.max_guests||2} hóspedes`;
   $('dd').textContent=cur.description;
   $('tags').innerHTML=amenityHtml(cur.amenities,99);
+  renderAirbnbEmbed(cur);
   let im=cur.images&&cur.images.length?cur.images:[''];
   $('gallery').innerHTML=`<img src="${im[0]}" onclick="openLB(0)"><img src="${im[1]||im[0]}" onclick="openLB(1)"><div class="more" onclick="openLB(2)"><img src="${im[2]||im[0]}" onclick="event.stopPropagation();openLB(2)"><span>+ ${Math.max(0,im.length-3)} fotos</span></div>`;
   let a=new Date(),b=new Date(a);
@@ -457,7 +468,7 @@ async function loadCalendar(){
     const now=new Date();
     const start=dateKey(new Date(now.getFullYear(),now.getMonth(),1));
     const end=dateKey(new Date(now.getFullYear()+1,now.getMonth()+1,1));
-    const url=`${WORKER_URL}/availability?loft_id=${encodeURIComponent(LOFT_UUIDS[cur.id])}&start=${start}&end=${end}`;
+    const url=`${WORKER_URL}/availability?loft_id=${encodeURIComponent(cur.dbId || LOFT_UUIDS[cur.id])}&start=${start}&end=${end}`;
     const r=await fetch(url,{cache:'no-store'});
     const data=await r.json();
     if(!r.ok || data.ok!==true) throw new Error(data.error||`Erro HTTP ${r.status}`);
@@ -495,7 +506,7 @@ async function checkAvailability(){
   box.style.color='#6b746f';
   cur._available=false;
   try{
-    const url=WORKER_URL+'/availability?loft_id='+encodeURIComponent(LOFT_UUIDS[cur.id])+
+    const url=WORKER_URL+'/availability?loft_id='+encodeURIComponent(cur.dbId || LOFT_UUIDS[cur.id])+
       '&start='+encodeURIComponent(cin)+'&end='+encodeURIComponent(cout);
     const r=await fetch(url,{headers:{'Accept':'application/json'}});
     const raw=await r.text();
@@ -610,7 +621,7 @@ async function submitReservation(){
       method:'POST',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
       body:JSON.stringify({
-        loft_id:LOFT_UUIDS[cur.id],check_in:checkIn,check_out:checkOut,
+        loft_id:(cur.dbId || LOFT_UUIDS[cur.id]),check_in:checkIn,check_out:checkOut,
         name,email,phone,document,guests_count,notes,payment_method
       })
     });
@@ -647,7 +658,7 @@ async function submitReservation(){
       <div class="booking-success">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Solicitação enviada!</h2>
-        <p class="success-sub">Sua solicitação foi registrada como <b>pendente</b>. As datas ainda não foram bloqueadas. <b>Para concluir a solicitação, envie a mensagem pelo WhatsApp.</b> Você receberá o link de pagamento pelo próprio WhatsApp.</p>
+        <p class="success-sub">Sua solicitação foi registrada como <b>pendente</b>. As datas ainda não foram bloqueadas. Enviaremos todos os dados pelo WhatsApp para combinar o pagamento.</p>
         <div class="success-card">
           <div class="srow"><span>Solicitação</span><strong>#${rid}</strong></div>
           <div class="srow"><span>Loft</span><strong>${cur.title}</strong></div>
@@ -656,10 +667,10 @@ async function submitReservation(){
           <div class="srow"><span>Total</span><strong>${total}</strong></div>
         </div>
         <div class="success-actions">
-          <button id="waConfirmBtn" class="btn" onclick="confirmWhatsAppAndFinish('${waUrl}')">📲 ENVIAR CONFIRMAÇÃO PELO WHATSAPP</button>
-          <button id="backAfterWa" class="btn secondary" style="display:none" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
+          <button class="btn" onclick="window.open('${waUrl}','_blank')">Enviar dados pelo WhatsApp</button>
+          <button class="btn secondary" onclick="$('modal').classList.remove('on')">Voltar ao loft</button>
         </div>
-        <div id="waRequiredNote" class="success-note"><b>Importante:</b> o envio desta mensagem pelo WhatsApp é obrigatório para concluir a solicitação. Depois, você receberá pelo WhatsApp o link para pagamento.</div>
+        <div class="success-note">A reserva só será confirmada e as datas bloqueadas depois que você receber o pagamento e confirmar no painel administrativo.</div>
       </div>`;
     btn.disabled=true;
   }catch(e){
@@ -667,19 +678,6 @@ async function submitReservation(){
     btn.disabled=false; btn.textContent='Solicitar reserva';
   }
 }
-
-function confirmWhatsAppAndFinish(url){
-  const btn=$('waConfirmBtn');
-  if(!btn)return;
-  window.open(url,'_blank');
-  btn.textContent='✓ CONFIRMAÇÃO ENVIADA PELO WHATSAPP';
-  btn.disabled=true;
-  btn.style.opacity='.75';
-  const back=$('backAfterWa');
-  if(back) back.style.display='block';
-  const note=$('waRequiredNote');
-  if(note) note.innerHTML='<b>Solicitação concluída.</b> Você receberá o link de pagamento pelo WhatsApp. A reserva só será confirmada e as datas bloqueadas após o pagamento e a confirmação no painel administrativo.';
-} 
 
 function goHome(){$('detail').style.display='none';$('home').style.display='block';window.scrollTo(0,0)}
 render(P);

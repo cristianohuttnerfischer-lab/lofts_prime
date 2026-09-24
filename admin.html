@@ -34,15 +34,7 @@ textarea{min-height:90px;resize:vertical}
 @media(max-width:700px){.reservation-grid{grid-template-columns:1fr}}
 
 
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc;cursor:grab;touch-action:none;user-select:none}.photo-item:active{cursor:grabbing}.photo-item.dragging{opacity:.45;transform:scale(.98)}.photo-item.drag-over{outline:3px solid #111827;outline-offset:2px}.photo-order{position:absolute;left:6px;top:6px;padding:5px 8px;border-radius:999px;background:#111827;color:#fff;font-size:11px;font-weight:800;z-index:2}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b;z-index:3}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.price-tools{margin-top:16px;padding:14px;border:1px solid #e2e6ec;border-radius:12px;background:#fafbfc}
-.price-tools h3{margin:0 0 5px;font-size:16px}.price-tools .hint{margin:0 0 12px}
-.price-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.price-tools-grid .full{grid-column:1/-1}
-.price-tools .actions{margin-top:10px}
-.price-list{margin-top:14px;display:grid;gap:7px;max-height:220px;overflow:auto}
-.price-rule{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 10px;background:#fff;border:1px solid #e2e6ec;border-radius:9px;font-size:12px}
-.price-rule b{font-size:12px}.price-rule .remove{padding:5px 8px}
-@media(max-width:520px){.price-tools-grid{grid-template-columns:1fr}}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo-item{position:relative;border:1px solid #e2e6ec;border-radius:12px;overflow:hidden;background:#f8fafc;cursor:grab;touch-action:none;user-select:none}.photo-item:active{cursor:grabbing}.photo-item.dragging{opacity:.45;transform:scale(.98)}.photo-item.drag-over{outline:3px solid #111827;outline-offset:2px}.photo-order{position:absolute;left:6px;top:6px;padding:5px 8px;border-radius:999px;background:#111827;color:#fff;font-size:11px;font-weight:800;z-index:2}.photo-item img{width:100%;height:140px;object-fit:cover;display:block}.photo-item button{position:absolute;right:6px;top:6px;padding:6px 9px;background:#fee2e2;color:#991b1b;z-index:3}.amenity-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 4px}.amenity-check{display:flex;align-items:center;gap:8px;border:1px solid #e2e6ec;border-radius:10px;padding:9px 10px;background:#fff;cursor:pointer}.amenity-check input{width:auto;margin:0}.amenity-check span{font-size:13px}.amenity-check:has(input:checked){border-color:#111827;background:#f7f8f9}@media(max-width:700px){.amenity-check-grid{grid-template-columns:1fr}}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-title{font-size:18px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dow{font-size:11px;font-weight:800;text-align:center;color:#667085;padding:5px 0}.day{min-height:62px;border:1px solid #e2e6ec;border-radius:9px;background:#fff;padding:6px;cursor:pointer}.day.muted-day{opacity:.35}.day.blocked{background:#fef2f2;color:#b42318;cursor:not-allowed}.day.has-price{border-color:#111827}.day-num{font-weight:800;font-size:12px}.day-price{font-size:11px;margin-top:5px}.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#667085;margin-top:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.free{background:#d1fae5}.dot.block{background:#fecaca}.dot.price{background:#111827}@media(max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}.photo-item img{height:120px}.day{min-height:54px;padding:4px}.day-price{font-size:10px}}
 
 .login-wrap{position:fixed;inset:0;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:24px;box-shadow:0 12px 40px #00000012}.login-card h1{margin:0 0 6px}.login-card p{color:#667085;font-size:13px}.login-card .primary{width:100%;margin-top:14px}.login-error{color:#b42318;font-size:13px;margin-top:10px;min-height:18px}
 </style>
@@ -89,7 +81,12 @@ textarea{min-height:90px;resize:vertical}
     <div><label>Taxa de limpeza (R$)</label><input id="cleaning" type="number" min="0" step=".01" value="150"></div>
    </div>
    <label>Link do anúncio Airbnb</label><input id="airbnbUrl" placeholder="https://www.airbnb.com.br/rooms/...">
+   <button class="secondary" type="button" onclick="refreshAirbnbPhotos()">↻ Atualizar fotos e comodidades do Airbnb</button>
    <label>URL do calendário iCal Airbnb (opcional)</label><input id="icalUrl" placeholder="Cole aqui somente se quiser cadastrar um calendário novo">
+   <label>Comodidades</label>
+   <div id="amenityList" class="amenity-check-grid"></div>
+   <div class="small" style="margin-top:6px;color:#667085">Marque as comodidades disponíveis no anúncio.</div>
+   <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input id="active" type="checkbox" checked style="width:auto"> Anúncio ativo no site</label>
    <div class="actions">
     <button class="primary" type="submit">💾 Salvar alterações</button>
     <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
@@ -111,37 +108,25 @@ textarea{min-height:90px;resize:vertical}
  <div class="calendar-head"><button class="secondary" onclick="changeCalendarMonth(-1)">‹</button><div id="calendarTitle" class="calendar-title"></div><button class="secondary" onclick="changeCalendarMonth(1)">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
  <div class="calendar-legend"><span><i class="dot free"></i>Disponível</span><span><i class="dot block"></i>Bloqueado</span><span><i class="dot price"></i>Preço especial</span></div>
- <p class="muted">Toque em uma data para alterar o preço daquele dia. Para vários dias, use a ferramenta abaixo.</p>
-
- <div class="price-tools">
-   <h3>💰 Preço por período</h3>
-   <p class="muted hint">Defina um preço especial ou aplique desconto a todas as noites do período.</p>
-   <div class="price-tools-grid">
-     <div><label>De</label><input id="periodStart" type="date"></div>
-     <div><label>Até</label><input id="periodEnd" type="date"></div>
-     <div><label>Tipo</label>
-       <select id="periodType">
-         <option value="fixed">Preço fixo por noite</option>
-         <option value="discount">Desconto percentual</option>
-       </select>
-     </div>
-     <div><label id="periodValueLabel">Valor</label><input id="periodValue" type="number" min="0" step="0.01" placeholder="Ex.: 280 ou 10"></div>
-     <div class="full muted" id="periodPreview"></div>
-   </div>
-   <div class="actions">
-     <button class="primary" onclick="applyPeriodPrice()">Aplicar ao período</button>
-     <button class="secondary" onclick="clearPeriodFields()">Limpar</button>
-   </div>
-   <div id="periodRules" class="price-list"></div>
+ <p class="muted">Toque em uma data disponível para cadastrar/alterar o preço daquela diária. Deixe em branco para usar a diária padrão.</p>
+ <div style="margin-top:14px;padding:12px;border:1px solid #ddd;border-radius:12px">
+  <b>Definir preço por período</b>
+  <div class="row" style="margin-top:8px">
+   <div><label>Data inicial</label><input id="rangeStart" type="date"></div>
+   <div><label>Data final</label><input id="rangeEnd" type="date"></div>
+  </div>
+  <div class="row">
+   <div><label>Preço por noite (R$)</label><input id="rangePrice" type="number" min="0" step="0.01"></div>
+   <div style="display:flex;align-items:end"><button class="primary" type="button" onclick="setDailyPriceRange()">Aplicar período</button></div>
+  </div>
  </div>
-
  <div class="actions"><button class="secondary" onclick="closeCalendarModal()">Fechar</button></div>
 </div></div>
 
 <script>
 const WORKER='https://lofts-prime-sync.cristianohuttnerfischer.workers.dev';
 let token=localStorage.getItem('lofts_prime_admin_token')||'';
-let data={lofts:[],prices:[],settings:[]}; let reservations=[];
+let data={lofts:[],prices:[],settings:[]}; let reservations=[]; let importedPhotos=[]; let importedAmenities=[];
 
 function show(msg,type='ok',target='notice'){
  const e=document.getElementById(target);e.textContent=msg;e.className='notice '+type;e.style.display='block';
@@ -202,8 +187,10 @@ function render(){
     <div class="muted">Até ${l.max_guests||2} hóspedes · Limpeza R$ ${Number(l.cleaning_fee??150).toFixed(2).replace('.',',')}</div>
     <div class="actions">
       <button class="primary" onclick='editLoft(${JSON.stringify(l)})'>Editar</button>
+      <button class="secondary" onclick='toggleLoftActive("${l.id}",${l.active!==false})'>${l.active===false?'▶ Ativar anúncio':'⏸ Desativar temporariamente'}</button>
       <button class="secondary" onclick='openPhotos("${l.id}")'>Fotos</button>
       <button class="secondary" onclick='openCalendar("${l.id}")'>Calendário</button>
+      <button class="secondary" style="color:#b42318" onclick='deleteLoft("${l.id}")'>🗑 Excluir definitivamente</button>
     </div>
   </div>`;
  }).join('');
@@ -212,12 +199,16 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function openModal(){document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 function newLoft(){
+ importedPhotos=[]; importedAmenities=[];
  document.getElementById('modalTitle').textContent='Novo apartamento';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
  document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
+ document.getElementById('active').checked=true;
+ renderAmenities();
  openModal();
 }
 function editLoft(l){
+ importedPhotos=Array.isArray(l.photos)?[...l.photos]:[]; importedAmenities=normalizeAmenities(l.amenities);
  document.getElementById('modalTitle').textContent='Editar apartamento';
  document.getElementById('loftId').value=l.id||'';
  document.getElementById('name').value=l.name||'';
@@ -229,10 +220,45 @@ function editLoft(l){
  document.getElementById('cleaning').value=l.cleaning_fee??150;
  document.getElementById('airbnbUrl').value=l.airbnb_url||'';
  document.getElementById('icalUrl').value='';
+ document.getElementById('active').checked=l.active!==false;
+ renderAmenities();
  openModal();
 }
+const AMENITY_OPTIONS=[
+ ['garage','🚗 Garagem'],['pool','🏊 Piscina'],['gym','🏋️ Academia'],['wifi','📶 Wi-Fi'],
+ ['self_checkin','🔑 Self check-in'],['air_conditioning','❄️ Ar-condicionado'],['heating','🔥 Aquecimento'],['kitchen','🍳 Cozinha'],
+ ['washing_machine','🧺 Máquina de lavar'],['tv','📺 TV'],['hot_water','🚿 Água quente'],['elevator','🛗 Elevador'],
+ ['workspace','💻 Espaço de trabalho'],['parking','🅿️ Estacionamento'],['balcony','🌿 Varanda'],['view','🌄 Vista'],
+ ['hairdryer','💨 Secador de cabelo']
+];
+const AMENITY_ALIASES={
+ 'wi-fi':'wifi','wifi':'wifi','internet':'wifi','self check-in':'self_checkin','self_checkin':'self_checkin',
+ 'ar-condicionado':'air_conditioning','ar condicionado':'air_conditioning','air conditioning':'air_conditioning',
+ 'aquecimento':'heating','cozinha':'kitchen','tv':'tv','hdtv':'tv','água quente':'hot_water','hot water':'hot_water',
+ 'máquina de lavar':'washing_machine','elevador':'elevator','garagem':'garage','piscina':'pool','academia':'gym',
+ 'estacionamento':'parking','espaço de trabalho':'workspace','varanda':'balcony','vista':'view','secador de cabelo':'hairdryer'
+};
+function normalizeAmenities(list){
+ const out=[];
+ (Array.isArray(list)?list:[]).forEach(v=>{
+   const raw=String(v||'').trim(); if(!raw)return;
+   const key=AMENITY_ALIASES[raw.toLowerCase()] || raw;
+   if(!out.includes(key)) out.push(key);
+ });
+ return out;
+}
+function renderAmenities(){
+ const box=document.getElementById('amenityList'); if(!box)return;
+ const selected=new Set(normalizeAmenities(importedAmenities));
+ box.innerHTML=AMENITY_OPTIONS.map(([value,label])=>`<label class="amenity-check"><input type="checkbox" value="${value}" ${selected.has(value)?'checked':''} onchange="syncAmenities()"><span>${label}</span></label>`).join('');
+}
+function syncAmenities(){
+ importedAmenities=[...document.querySelectorAll('#amenityList input[type=checkbox]:checked')].map(x=>x.value);
+}
+
 async function saveLoft(ev){
  ev.preventDefault();
+ syncAmenities();
  const id=document.getElementById('loftId').value;
  const body={
   loft_id:id||null,name:document.getElementById('name').value.trim(),
@@ -240,7 +266,10 @@ async function saveLoft(ev){
   location:document.getElementById('location').value.trim(),
   max_guests:Number(document.getElementById('maxGuests').value||2),
   cleaning_fee:Number(document.getElementById('cleaning').value||0),
-  airbnb_url:document.getElementById('airbnbUrl').value.trim()
+  airbnb_url:document.getElementById('airbnbUrl').value.trim(),
+  active:document.getElementById('active').checked,
+  photos:importedPhotos,
+  amenities:importedAmenities
  };
  try{
   const r=await api('/admin/loft',{method:'POST',body:JSON.stringify(body)});
@@ -255,13 +284,74 @@ async function saveLoft(ev){
   closeModal();show(id?'✅ Alterações salvas no banco.':'✅ Apartamento criado e salvo no banco.','ok');await loadData();
  }catch(e){show('❌ '+e.message,'err','formNotice')}
 }
-function importAirbnb(){
+async function toggleLoftActive(id,currentActive){
+ const next=!currentActive;
+ const action=next?'ativar':'desativar temporariamente';
+ if(!confirm(`${next?'Ativar':'Desativar temporariamente'} este anúncio?\n\n${next?'Ele voltará a aparecer no site.':'Ele ficará oculto do site, mas permanecerá no painel para você reativar depois.'}`))return;
+ try{
+  await api('/admin/loft',{method:'POST',body:JSON.stringify({loft_id:id,active:next})});
+  show(next?'✅ Anúncio ativado novamente.':'⏸ Anúncio desativado temporariamente.','ok');
+  await loadData();
+ }catch(e){show('❌ '+e.message,'err')}
+}
+async function deleteLoft(id){
+ if(!confirm('Excluir DEFINITIVAMENTE este anúncio?\n\nEsta ação remove o loft do painel e do site e não poderá ser desfeita.'))return;
+ try{await api('/admin/loft',{method:'DELETE',body:JSON.stringify({loft_id:id})});show('✅ Anúncio excluído definitivamente.','ok');await loadData();}
+ catch(e){show('❌ '+e.message,'err')}
+}
+async function importAirbnb(){
  document.getElementById('modalTitle').textContent='Importar anúncio do Airbnb';
  ['loftId','name','description','location','airbnbUrl','icalUrl'].forEach(id=>document.getElementById(id).value='');
- document.getElementById('airbnbUrl').focus();
- document.getElementById('maxGuests').value=2;document.getElementById('price').value=0;document.getElementById('cleaning').value=150;
- show('Cole o link do anúncio. Nesta primeira versão, o link será salvo e você poderá completar os dados; a importação automática de conteúdo/fotos será adicionada com segurança depois.','ok','formNotice');
+ document.getElementById('maxGuests').value=2;
+ document.getElementById('price').value=0;
+ document.getElementById('cleaning').value=150;
+ importedPhotos=[]; importedAmenities=[];
+ renderAmenities();
  openModal();
+ const url=prompt('Cole o link completo do anúncio do Airbnb:');
+ if(!url){closeModal();return;}
+ document.getElementById('airbnbUrl').value=url.trim();
+ show('Consultando o anúncio do Airbnb...','ok','formNotice');
+ try{
+   let j;
+   try{
+    j=await api('/admin/import-airbnb',{method:'POST',body:JSON.stringify({url:url.trim()})});
+   }catch(e){
+    if(/404|rota|not found|não encontrado/i.test(String(e.message||e))) throw new Error('A rota de importação não existe no Worker publicado. Publique o Worker corrigido antes de importar anúncios do Airbnb.');
+    throw e;
+   }
+   const l=j.listing||{};
+   document.getElementById('name').value=l.name||'';
+   document.getElementById('description').value=l.description||'';
+   document.getElementById('location').value=l.location||'';
+   document.getElementById('maxGuests').value=Number(l.max_guests||2);
+   importedPhotos=Array.isArray(l.photos)?l.photos:[];
+   importedAmenities=normalizeAmenities(l.amenities);
+   renderAmenities();
+   const ical=prompt('Agora cole a URL do calendário iCal do Airbnb para bloquear automaticamente as datas ocupadas.\n\nNo Airbnb: Calendário → Disponibilidade → Conectar calendários → Exportar calendário → copie a URL .ics.\n\nSe preferir configurar depois, clique em Cancelar.');
+   if(ical && /^https?:\/\//i.test(ical.trim())) document.getElementById('icalUrl').value=ical.trim();
+   show(`✅ Anúncio importado. ${importedPhotos.length} foto(s) encontrada(s). ${document.getElementById('icalUrl').value?'Calendário iCal preenchido e será sincronizado ao salvar.':'Informe a diária e, se quiser, o iCal antes de salvar.'}`,'ok','formNotice');
+ }catch(e){
+   show('❌ '+e.message,'err','formNotice');
+ }
+}
+async function refreshAirbnbPhotos(){
+ const url=(document.getElementById('airbnbUrl').value||'').trim();
+ if(!url){show('Informe primeiro o link do Airbnb.','err','formNotice');return;}
+ try{
+   show('Consultando novamente as fotos do Airbnb...','ok','formNotice');
+   const j=await api('/admin/import-airbnb',{method:'POST',body:JSON.stringify({url})});
+   const l=j.listing||{};
+   if(Array.isArray(l.photos) && l.photos.length){
+     // O importador traz somente a primeira foto. Se já houver fotos manuais,
+     // preserva todas e atualiza apenas a capa.
+     if(importedPhotos.length){ importedPhotos[0]=l.photos[0]; }
+     else { importedPhotos=[l.photos[0]]; }
+   }
+   if(Array.isArray(l.amenities) && l.amenities.length){ importedAmenities=normalizeAmenities(l.amenities); }
+   renderAmenities();
+   show(`✅ Capa atualizada. As demais fotos existentes foram preservadas.`,'ok','formNotice');
+ }catch(e){show('❌ '+e.message,'err','formNotice');}
 }
 let photoLoftId='';
 function openPhotos(id){
@@ -356,16 +446,7 @@ async function deletePhoto(url){
 
 let calendarLoftId='';let calendarMonth=new Date();
 let calendarBlocked=[];
-function openCalendar(id){
- calendarLoftId=id;calendarMonth=new Date();
- document.getElementById('calendarModal').classList.add('open');
- const s=document.getElementById('periodStart'),e=document.getElementById('periodEnd');
- const now=dateKey(new Date());
- if(s&&!s.value)s.value=now;
- if(e&&!e.value)e.value=now;
- ['periodStart','periodEnd','periodType','periodValue'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePeriodPreview));
- loadAdminCalendar();
-}
+function openCalendar(id){calendarLoftId=id;calendarMonth=new Date();document.getElementById('calendarModal').classList.add('open');loadAdminCalendar();}
 function closeCalendarModal(){document.getElementById('calendarModal').classList.remove('open')}
 function changeCalendarMonth(delta){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+delta,1);loadAdminCalendar()}
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -398,102 +479,18 @@ function renderAdminCalendar(){
  }
  grid.innerHTML=html;
 }
-
-function getPeriodDates(start,end){
- const out=[];
- if(!start||!end)return out;
- let d=new Date(start+'T12:00:00');
- const last=new Date(end+'T12:00:00');
- if(d>last)return out;
- while(d<=last){
-   out.push(dateKey(d));
-   d.setDate(d.getDate()+1);
- }
- return out;
-}
-function updatePeriodPreview(){
- const s=document.getElementById('periodStart')?.value||'';
- const e=document.getElementById('periodEnd')?.value||'';
- const type=document.getElementById('periodType')?.value||'fixed';
- const v=Number(document.getElementById('periodValue')?.value||0);
- const preview=document.getElementById('periodPreview');
- if(!preview)return;
- const dates=getPeriodDates(s,e);
- if(!dates.length){preview.textContent='Selecione um período válido.';return}
- const blocked=dates.filter(k=>isBlockedAdmin(k));
- const available=dates.length-blocked.length;
- const base=Number((data.prices||[]).find(x=>x.loft_id===calendarLoftId)?.nightly_price||0);
- let final=type==='discount'?base*(1-v/100):v;
- final=Math.max(0,final);
- preview.textContent=`${dates.length} noite(s) selecionada(s) · ${available} disponível(is) · ${blocked.length} bloqueada(s) · preço aplicado: R$ ${final.toFixed(2).replace('.',',')}/noite`;
-}
-function clearPeriodFields(){
- const s=document.getElementById('periodStart'),e=document.getElementById('periodEnd'),v=document.getElementById('periodValue');
- if(s)s.value='';if(e)e.value='';if(v)v.value='';
- updatePeriodPreview();
-}
-async function applyPeriodPrice(){
- const start=document.getElementById('periodStart').value;
- const end=document.getElementById('periodEnd').value;
- const type=document.getElementById('periodType').value;
- const raw=document.getElementById('periodValue').value;
- const value=Number(String(raw).replace(',','.'));
- if(!start||!end) return show('Informe as datas inicial e final.','err','calendarNotice');
- if(start>end) return show('A data inicial não pode ser maior que a final.','err','calendarNotice');
- if(!Number.isFinite(value)||value<0) return show('Informe um valor válido.','err','calendarNotice');
- if(type==='discount' && value>100) return show('O desconto deve estar entre 0% e 100%.','err','calendarNotice');
-
- const dates=getPeriodDates(start,end);
- const blocked=dates.filter(isBlockedAdmin);
- const available=dates.filter(k=>!isBlockedAdmin(k));
- if(!available.length) return show('Não há datas disponíveis nesse período para alterar o preço.','err','calendarNotice');
-
- const base=Number((data.prices||[]).find(x=>x.loft_id===calendarLoftId)?.nightly_price||0);
- const finalPrice=type==='discount' ? Math.max(0,base*(1-value/100)) : value;
- const rounded=Math.round(finalPrice*100)/100;
-
- if(!confirm(`Aplicar R$ ${rounded.toFixed(2).replace('.',',')} por noite em ${available.length} noite(s)?${blocked.length?` ${blocked.length} data(s) bloqueada(s) serão ignoradas.`:''}`)) return;
-
- const btn=document.querySelector('.price-tools .primary');
- if(btn)btn.disabled=true;
+async function setDailyPriceRange(){
+ const start=document.getElementById('rangeStart').value;
+ const end=document.getElementById('rangeEnd').value;
+ const value=document.getElementById('rangePrice').value;
+ if(!start||!end||end<start){show('Informe um período válido.','err','calendarNotice');return}
+ const price=Number(value);
+ if(!Number.isFinite(price)||price<0){show('Informe um preço válido.','err','calendarNotice');return}
+ if(!confirm(`Aplicar R$ ${price.toFixed(2).replace('.',',')} por noite de ${formatBRDate(start)} até ${formatBRDate(end)}?`))return;
  try{
-   let done=0;
-   for(const k of available){
-     await api('/admin/daily-price',{method:'POST',body:JSON.stringify({loft_id:calendarLoftId,date:k,price:rounded})});
-     done++;
-   }
-   const j=await api('/admin/data'); data=j; render();
-   await loadAdminCalendar();
-   clearPeriodFields();
-   show(`✅ Preço aplicado em ${done} noite(s).`,'ok','calendarNotice');
- }catch(e){
-   show(`❌ Falha após ${0} alteração(ões): ${e.message}`,'err','calendarNotice');
- }finally{
-   if(btn)btn.disabled=false;
- }
-}
-function renderPeriodRules(){
- const el=document.getElementById('periodRules');
- if(!el)return;
- const arr=(data.daily_prices||[])
-   .filter(x=>x.loft_id===calendarLoftId)
-   .filter(x=>x.date)
-   .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
- if(!arr.length){el.innerHTML='<div class="muted">Nenhum preço especial cadastrado para este loft.</div>';return}
- const visible=arr.filter(x=>{
-   const d=new Date(String(x.date)+'T12:00:00');
-   const m=calendarMonth.getMonth(), y=calendarMonth.getFullYear();
-   return d.getFullYear()===y && d.getMonth()===m;
- });
- if(!visible.length){el.innerHTML='<div class="muted">Nenhum preço especial neste mês.</div>';return}
- el.innerHTML=visible.map(x=>`<div class="price-rule"><span><b>${formatBRDate(x.date)}</b> · R$ ${Number(x.price).toFixed(2).replace('.',',')}</span><button class="secondary remove" onclick="deleteDailyPrice('${x.date}')">Excluir</button></div>`).join('');
-}
-async function deleteDailyPrice(k){
- if(!confirm(`Remover o preço especial de ${formatBRDate(k)} e voltar à diária padrão?`))return;
- try{
-   await api('/admin/daily-price?loft_id='+encodeURIComponent(calendarLoftId)+'&date='+encodeURIComponent(k),{method:'DELETE'});
-   const j=await api('/admin/data');data=j;render();await loadAdminCalendar();
-   show('✅ Preço especial removido.','ok','calendarNotice');
+   const j=await api('/admin/daily-price-range',{method:'POST',body:JSON.stringify({loft_id:calendarLoftId,start_date:start,end_date:end,price})});
+   data=await api('/admin/data'); render(); await loadAdminCalendar();
+   show(`✅ Preço aplicado em ${j.count||0} diária(s). Datas bloqueadas foram ignoradas.`,'ok','calendarNotice');
  }catch(e){show('❌ '+e.message,'err','calendarNotice')}
 }
 
