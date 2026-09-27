@@ -50,6 +50,212 @@ textarea{min-height:90px;resize:vertical}
 
 .amenities-box{margin-top:18px;padding:14px;border:1px solid #e2e6ec;border-radius:12px;background:#fafbfc}.amenities-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.amenity-check{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid #e1e5ea;border-radius:10px;background:#fff;cursor:pointer;font-weight:600;font-size:14px}.amenity-check input{width:18px;height:18px;accent-color:#172033}.amenity-check:has(input:checked){border-color:#172033;box-shadow:0 0 0 1px #172033 inset}@media(max-width:650px){.amenities-grid{grid-template-columns:1fr 1fr}}
 </style>
+<style>
+/* ===== Lofts Prime — camada visual moderna (sem alterar a lógica existente) ===== */
+:root{
+  --lp-bg:#f4f6f8;--lp-card:#fff;--lp-text:#172033;--lp-muted:#667085;
+  --lp-border:#e4e7ec;--lp-shadow:0 8px 28px rgba(16,24,40,.07);
+}
+body{background:var(--lp-bg)!important;color:var(--lp-text)}
+header{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94)!important;
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--lp-border);
+  box-shadow:0 2px 12px rgba(16,24,40,.04)
+}
+header strong{font-size:20px;letter-spacing:-.3px}
+main{max-width:1400px!important;margin:auto!important;padding:22px 20px 50px!important}
+.lp-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.lp-topbar .toolbar{margin:0!important}
+.lp-tabs{
+ display:flex;gap:6px;overflow:auto;padding:6px;background:#e9edf2;border:1px solid #dde2e8;
+ border-radius:14px;margin:0 0 18px;position:sticky;top:64px;z-index:15
+}
+.lp-tab{
+ border:0!important;background:transparent!important;color:#667085!important;
+ border-radius:10px!important;padding:11px 15px!important;font-weight:800!important;
+ white-space:nowrap;cursor:pointer;box-shadow:none!important
+}
+.lp-tab.active{background:#fff!important;color:#172033!important;box-shadow:0 2px 8px rgba(16,24,40,.08)!important}
+.lp-pane{display:none}.lp-pane.active{display:block}
+.lp-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
+.lp-section-head h2{margin:0}.lp-section-head p{margin:4px 0 0;color:var(--lp-muted);font-size:13px}
+.lp-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.lp-kpi{background:#fff;border:1px solid var(--lp-border);border-radius:16px;padding:16px;box-shadow:var(--lp-shadow)}
+.lp-kpi .label{font-size:12px;color:var(--lp-muted);font-weight:700}.lp-kpi .value{font-size:24px;font-weight:900;margin-top:5px}
+.lp-kpi .sub{font-size:11px;color:var(--lp-muted);margin-top:3px}
+.lp-filter{display:grid;grid-template-columns:1.1fr 1.1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:14px}
+.lp-filter label{margin-bottom:5px}
+.lp-filter input,.lp-filter select{width:100%;box-sizing:border-box}
+.lp-table-wrap{overflow:auto;background:#fff;border:1px solid var(--lp-border);border-radius:14px;box-shadow:var(--lp-shadow)}
+.lp-table{width:100%;border-collapse:collapse;min-width:760px}
+.lp-table th,.lp-table td{padding:11px 12px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13px;white-space:nowrap}
+.lp-table th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#667085;background:#fafbfc}
+.lp-table tr:last-child td{border-bottom:0}
+.lp-report-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.lp-report-card{background:#fff;border:1px solid var(--lp-border);border-radius:16px;padding:16px;box-shadow:var(--lp-shadow)}
+.lp-report-card h3{margin:0 0 12px}
+.lp-mini-list{display:grid;gap:8px}.lp-mini-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eef0f3;font-size:13px}.lp-mini-row:last-child{border-bottom:0}
+.lp-empty{text-align:center;color:#667085;padding:28px}
+.lp-status{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}
+.lp-status.confirmed{background:#ecfdf3;color:#027a48}.lp-status.pending{background:#fffaeb;color:#b54708}.lp-status.rejected,.lp-status.cancelled{background:#fef3f2;color:#b42318}
+.lp-export{display:flex;gap:8px;flex-wrap:wrap}
+.lp-note{font-size:12px;color:#667085;margin-top:8px}
+@media(max-width:900px){.lp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.lp-filter{grid-template-columns:1fr 1fr}.lp-report-grid{grid-template-columns:1fr}}
+@media(max-width:600px){
+ main{padding:14px 12px 40px!important}.lp-tabs{top:57px}.lp-kpis{grid-template-columns:1fr 1fr}
+ .lp-kpi .value{font-size:19px}.lp-filter{grid-template-columns:1fr}
+}
+</style>
+
+
+<style id="lp-professional-v3">
+:root{
+ --lp-bg:#07101b;--lp-surface:#0d1827;--lp-surface2:#111f31;--lp-line:#263b55;
+ --lp-text:#eef6ff;--lp-muted:#8fa2ba;--lp-cyan:#22d3ee;--lp-violet:#8b5cf6;
+ --lp-green:#34d399;--lp-red:#fb7185;--lp-shadow:0 18px 55px rgba(0,0,0,.28)
+}
+html,body{background:radial-gradient(circle at 10% 0%,rgba(34,211,238,.09),transparent 30%),radial-gradient(circle at 90% 0%,rgba(139,92,246,.11),transparent 32%),var(--lp-bg)!important;color:var(--lp-text)!important}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(#000,transparent 88%);z-index:0}
+header{position:sticky!important;top:0;z-index:100!important;background:rgba(5,10,17,.88)!important;color:#fff!important;border-bottom:1px solid rgba(34,211,238,.18)!important;backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.2)}
+header span{color:#a9b8ca!important}
+main{position:relative;z-index:1;max-width:1420px!important}
+.card,.lp-kpi,.lp-report-card,.box,.period-calendar-tools,.reservation,.photo-item{background:linear-gradient(145deg,rgba(14,26,42,.98),rgba(9,17,29,.98))!important;color:var(--lp-text)!important;border-color:var(--lp-line)!important;box-shadow:var(--lp-shadow)!important}
+.card *, .lp-kpi *, .lp-report-card *, .box *, .period-calendar-tools *, .reservation *{color:inherit}
+.muted,.lp-section-head p,.lp-note{color:var(--lp-muted)!important}
+.lp-tabs{background:rgba(8,16,27,.90)!important;border-color:var(--lp-line)!important;box-shadow:0 12px 30px rgba(0,0,0,.22);z-index:150!important}
+.lp-tab{color:var(--lp-muted)!important}.lp-tab.active{background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(139,92,246,.17))!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(34,211,238,.28),0 8px 24px rgba(0,0,0,.18)!important}
+.lp-kpi{border-color:var(--lp-line)!important}.lp-kpi .label{color:var(--lp-muted)!important}.lp-kpi .sub{color:var(--lp-muted)!important}.lp-kpi .value{color:#fff!important}
+.lp-kpi:after{content:"";display:block;height:2px;margin-top:12px;border-radius:2px;background:linear-gradient(90deg,var(--lp-cyan),var(--lp-violet))}
+input,select,textarea{background:#081321!important;color:#f4f8ff!important;border-color:#2a405d!important}
+input::placeholder,textarea::placeholder{color:#667b95!important}
+button{border-radius:10px!important}
+.primary{background:linear-gradient(135deg,#0891b2,#2563eb)!important;color:#fff!important;border:1px solid rgba(34,211,238,.45)!important}
+.secondary{background:linear-gradient(135deg,#142235,#0e1a2a)!important;color:#eef6ff!important;border:1px solid #2a405d!important}
+.danger{background:linear-gradient(135deg,#5f1829,#3d1220)!important;color:#ffd8df!important;border:1px solid rgba(251,113,133,.4)!important}
+.lp-table-wrap{background:#0b1625!important;border-color:var(--lp-line)!important}
+.lp-table th{background:#111f31!important;color:#8ee9f4!important;border-color:var(--lp-line)!important}
+.lp-table td{border-color:#1d3048!important;color:#e9f2fb!important}
+.lp-report-card h3{color:#fff!important}
+.modal{z-index:1000!important;background:rgba(1,5,10,.78)!important;backdrop-filter:blur(8px)}
+.modal .box{width:min(820px,100%);max-height:88vh;overflow:auto}
+.notice.ok{background:rgba(52,211,153,.12)!important;color:#6ee7b7!important;border:1px solid rgba(52,211,153,.25)}
+.notice.err{background:rgba(251,113,133,.12)!important;color:#fda4af!important;border:1px solid rgba(251,113,133,.25)}
+.badge{background:rgba(52,211,153,.12)!important;color:#6ee7b7!important;border:1px solid rgba(52,211,153,.25)}
+.calendar-grid .day{background:#0b1726!important;border-color:#263b55!important;color:#eef6ff!important}
+.calendar-grid .day.blocked{background:rgba(251,113,133,.12)!important;color:#fda4af!important}
+.calendar-grid .calendar-dow{color:#8fa2ba!important}
+.period-calendar-tools,.period-calendar-item{background:#0b1726!important;border-color:#263b55!important}
+.login-wrap{z-index:2000!important;background:radial-gradient(circle at 50% 20%,rgba(34,211,238,.12),transparent 28%),var(--lp-bg)!important}
+.login-card{background:rgba(13,24,39,.96)!important;border-color:#2a405d!important;color:#fff!important;box-shadow:0 25px 80px rgba(0,0,0,.45)}
+.login-card p{color:var(--lp-muted)!important}
+.photo-item{border-color:#263b55!important}
+@media print{
+ @page{size:A4 landscape;margin:12mm}
+ body{background:#fff!important;color:#111!important}
+ body:before,header,.lp-topbar,.lp-tabs,#tab-dashboard,#tab-apartments,#tab-reservations,#tab-settings,.notice,.lp-filter,.lp-export,.lp-note{display:none!important}
+ main{max-width:none!important;padding:0!important}
+ #tab-reports{display:block!important}
+ #tab-reports .lp-section-head h2{color:#111!important}
+ #tab-reports .lp-section-head p{color:#555!important}
+ .lp-kpi,.lp-report-card,.lp-table-wrap{background:#fff!important;color:#111!important;box-shadow:none!important;border:1px solid #ddd!important}
+ .lp-kpi .label,.lp-kpi .sub,.lp-kpi .value,.lp-report-card h3,.lp-table td{color:#111!important}
+ .lp-table th{background:#f3f4f6!important;color:#222!important}
+ .lp-table td,.lp-table th{border-color:#ddd!important}
+}
+</style>
+
+<style id="lp-dark-form-fix">
+/* ===== Correção de contraste — formulários e comodidades ===== */
+.amenities-box{
+  background:linear-gradient(145deg,#0b1726,#0a1422)!important;
+  border-color:#263b55!important;
+}
+.amenities-box b,
+.amenities-box strong{color:#eef6ff!important}
+.amenities-box .muted{color:#8fa2ba!important}
+
+.amenity-check{
+  background:linear-gradient(145deg,#101f32,#0c1828)!important;
+  color:#eaf4ff!important;
+  border-color:#2b425f!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.16);
+}
+.amenity-check span{color:#eaf4ff!important}
+.amenity-check input{
+  background:#081321!important;
+  border-color:#3a5270!important;
+  accent-color:#22d3ee!important;
+}
+.amenity-check:hover{
+  border-color:#22d3ee!important;
+  background:linear-gradient(145deg,#132840,#0e1d30)!important;
+}
+.amenity-check:has(input:checked){
+  border-color:#22d3ee!important;
+  background:linear-gradient(145deg,rgba(34,211,238,.16),rgba(139,92,246,.12))!important;
+  box-shadow:0 0 0 1px rgba(34,211,238,.45) inset,0 8px 22px rgba(0,0,0,.2)!important;
+}
+.amenity-check:has(input:checked) span{color:#fff!important}
+
+/* Blocos internos do cadastro/edição que ainda tinham fundo claro inline */
+#modal .box > form > div[style*="background:#fafbfc"],
+#modal .box > form > div[style*="background:#fff"]{
+  background:linear-gradient(145deg,#0b1726,#0a1422)!important;
+  border-color:#263b55!important;
+  color:#eef6ff!important;
+}
+#modal .box > form > div[style*="background:#fafbfc"] .muted{
+  color:#8fa2ba!important;
+}
+
+/* Campo de upload de fotos */
+input[type="file"]{
+  background:#081321!important;
+  color:#dcecff!important;
+  border-color:#2a405d!important;
+}
+input[type="file"]::file-selector-button{
+  background:#14263b!important;
+  color:#eef6ff!important;
+  border:1px solid #35506e!important;
+  border-radius:8px;
+  padding:7px 10px;
+  margin-right:10px;
+  cursor:pointer;
+}
+
+/* Melhor contraste dos modais */
+.modal .box h2{color:#fff!important}
+.modal .box label{color:#a9bad0!important}
+.modal .box .muted{color:#8fa2ba!important}
+
+/* Período e calendário */
+.period-calendar-tools,
+.period-calendar-item{
+  background:linear-gradient(145deg,#0b1726,#0a1422)!important;
+  color:#eef6ff!important;
+  border-color:#263b55!important;
+}
+.period-calendar-tools h3{color:#fff!important}
+
+/* Selects e opções */
+select option{
+  background:#0d1b2b;
+  color:#eef6ff;
+}
+
+/* Remove qualquer cartão claro residual dentro dos modais */
+.modal .box [style*="background:#fff"],
+.modal .box [style*="background: #fff"],
+.modal .box [style*="background:#fafbfc"],
+.modal .box [style*="background: #fafbfc"]{
+  background:#0b1726!important;
+  color:#eef6ff!important;
+  border-color:#263b55!important;
+}
+</style>
+
 </head>
 <body>
 <div id="loginScreen" class="login-wrap">
@@ -63,27 +269,105 @@ textarea{min-height:90px;resize:vertical}
   </div>
 </div>
 <header><div><strong>Lofts Prime</strong><br><span>Painel administrativo</span></div><span id="status">Conectando...</span></header>
+
 <main>
   <div id="notice" class="notice"></div>
-  <div class="toolbar">
-    <button class="primary" onclick="newLoft()">＋ Novo apartamento</button>
-    <button class="secondary" onclick="importAirbnb()">↗ Importar anúncio do Airbnb</button>
-    <button class="secondary" onclick="showReservations()">📋 Solicitações de reserva</button>
-    <button class="secondary" onclick="loadData()">↻ Atualizar</button>
-    <button class="secondary" onclick="logout()">Sair</button>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <h2>💳 Pix Lofts Prime</h2>
-    <div class="muted">Chave que recebe os 20% de comissão + a taxa de faxina.</div>
-    <div class="row" style="margin-top:8px">
-      <div><label>Chave Pix Lofts Prime</label><input id="primePix" placeholder="CPF, CNPJ, telefone, e-mail ou chave aleatória"></div>
-      <div><label>Beneficiário</label><input id="primePixName" placeholder="Nome do beneficiário"></div>
+
+  <div class="lp-topbar">
+    <div>
+      <h1 style="margin:0;font-size:25px;letter-spacing:-.5px">Painel de gestão</h1>
+      <div class="muted">Lofts Prime · reservas, apartamentos, preços e relatórios</div>
     </div>
-    <div class="actions"><button class="primary" onclick="savePrimePix()">💾 Salvar Pix Lofts Prime</button></div>
+    <div class="toolbar">
+      <button class="primary" onclick="newLoft()">＋ Novo apartamento</button>
+      <button class="secondary" onclick="importAirbnb()">↗ Importar Airbnb</button>
+      <button class="secondary" onclick="loadData()">↻ Atualizar</button>
+      <button class="secondary" onclick="logout()">Sair</button>
+    </div>
   </div>
-  <div id="reservationsPanel"></div>
-  <div id="lofts" class="grid"><div class="empty">Carregando...</div></div>
+
+  <div class="lp-tabs" role="tablist">
+    <button class="lp-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Visão geral</button>
+    <button class="lp-tab" data-tab="apartments" onclick="switchTab('apartments')">🏠 Apartamentos</button>
+    <button class="lp-tab" data-tab="reservations" onclick="switchTab('reservations');showReservations()">📋 Reservas</button>
+    <button class="lp-tab" data-tab="reports" onclick="switchTab('reports');loadReport()">📈 Relatórios</button>
+    <button class="lp-tab" data-tab="settings" onclick="switchTab('settings')">⚙️ Configurações</button>
+  </div>
+
+  <section id="tab-dashboard" class="lp-pane active">
+    <div class="lp-section-head">
+      <div><h2>Visão geral</h2><p>Resumo rápido da operação atual.</p></div>
+    </div>
+    <div id="dashboardKpis" class="lp-kpis"></div>
+    <div class="card">
+      <h2>Atalhos</h2>
+      <div class="actions">
+        <button class="primary" onclick="switchTab('apartments')">Gerenciar apartamentos</button>
+        <button class="secondary" onclick="switchTab('reservations');showReservations()">Ver solicitações</button>
+        <button class="secondary" onclick="switchTab('reports');loadReport()">Abrir relatórios</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-apartments" class="lp-pane">
+    <div class="lp-section-head">
+      <div><h2>Apartamentos</h2><p>Cadastre, edite, ative, desative e gerencie preços e calendários.</p></div>
+    </div>
+    <div id="lofts" class="grid"><div class="empty">Carregando...</div></div>
+  </section>
+
+  <section id="tab-reservations" class="lp-pane">
+    <div class="lp-section-head">
+      <div><h2>Reservas</h2><p>Solicitações, pagamentos, confirmação e comunicação com o hóspede.</p></div>
+      <button class="secondary" onclick="showReservations()">↻ Atualizar reservas</button>
+    </div>
+    <div id="reservationsPanel"></div>
+  </section>
+
+  <section id="tab-reports" class="lp-pane">
+    <div class="lp-section-head">
+      <div><h2>Relatórios</h2><p>Filtre por apartamento e período. Os valores são calculados a partir das reservas carregadas pelo Worker.</p></div>
+      <div class="lp-export">
+        <button class="secondary" onclick="exportReportCSV()">⬇ Exportar CSV</button>
+        <button class="primary" onclick="exportReportPDF()">📄 Exportar PDF</button>
+        <button class="secondary" onclick="loadReport()">↻ Atualizar</button>
+      </div>
+    </div>
+    <div class="lp-filter">
+      <div><label>Data inicial</label><input id="reportFrom" type="date" onchange="renderReport()"></div>
+      <div><label>Data final</label><input id="reportTo" type="date" onchange="renderReport()"></div>
+      <div><label>Apartamento</label><select id="reportLoft" onchange="renderReport()"><option value="">Todos</option></select></div>
+      <div><label>Status</label><select id="reportStatus" onchange="renderReport()"><option value="confirmed">Confirmadas</option><option value="">Todos os status</option><option value="pending">Pendentes</option><option value="rejected">Recusadas</option><option value="cancelled">Canceladas</option></select></div>
+      <button class="secondary" onclick="clearReportFilters()">Limpar</button>
+    </div>
+    <div id="reportKpis" class="lp-kpis"></div>
+    <div class="lp-report-grid">
+      <div class="lp-report-card"><h3>Por apartamento</h3><div id="reportByLoft"></div></div>
+      <div class="lp-report-card"><h3>Por período</h3><div id="reportByMonth"></div></div>
+    </div>
+    <div class="lp-report-card" style="margin-top:14px">
+      <h3>Detalhamento das reservas</h3>
+      <div id="reportTable" class="lp-table-wrap"></div>
+      <div class="lp-note">O relatório considera o período da reserva quando houver interseção com o filtro informado.</div>
+    </div>
+  </section>
+
+  <section id="tab-settings" class="lp-pane">
+    <div class="lp-section-head">
+      <div><h2>Configurações</h2><p>Dados de recebimento do Lofts Prime.</p></div>
+    </div>
+    <div class="card">
+      <h2>💳 Pix Lofts Prime</h2>
+      <div class="muted">Chave que recebe os 20% de comissão + a taxa de faxina.</div>
+      <div class="row" style="margin-top:8px">
+        <div><label>Chave Pix Lofts Prime</label><input id="primePix" placeholder="CPF, CNPJ, telefone, e-mail ou chave aleatória"></div>
+        <div><label>Beneficiário</label><input id="primePixName" placeholder="Nome do beneficiário"></div>
+      </div>
+      <div class="actions"><button class="primary" onclick="savePrimePix()">💾 Salvar Pix Lofts Prime</button></div>
+    </div>
+  </section>
 </main>
+
 
 <div id="modal" class="modal">
  <div class="box">
@@ -176,7 +460,8 @@ async function api(path,opts={}){
  opts.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opts.headers||{});
  const r=await fetch(WORKER+path,opts);
  const t=await r.text();
- // DELETE pode retornar 204/2xx sem corpo. Isso é sucesso, não erro de JSON.
+ // Algumas operações DELETE do Worker retornam 204/2xx sem corpo.
+ // Isso significa sucesso e não deve ser interpretado como erro de JSON.
  if(r.ok && !t.trim()) return {ok:true};
  let j;
  try{j=JSON.parse(t)}catch{throw new Error(t||('HTTP '+r.status))}
@@ -208,6 +493,7 @@ async function loadData(){
   loadPrimePixFromSettings();
   document.getElementById('status').textContent='● Conectado';
   render();
+  renderDashboard();
  }catch(e){
   document.getElementById('status').textContent='Erro de conexão';
   if(/401|Sessão|Unauthorized/i.test(String(e.message||e))){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();}
@@ -475,16 +761,13 @@ async function deletePhoto(url){
 
 async function toggleLoftActive(id,active){try{await api('/admin/loft',{method:'POST',body:JSON.stringify({loft_id:id,active})});show(active?'✅ Anúncio ativado.':'⏸ Anúncio desativado.','ok');await loadData()}catch(e){show('❌ '+e.message,'err')}}
 async function deleteLoft(id){
- const loft=(data.lofts||[]).find(x=>x.id===id);
- if(!loft)return;
+ const loft=(data.lofts||[]).find(x=>x.id===id); if(!loft)return;
  if(!confirm('Excluir definitivamente o anúncio "'+(loft.name||'')+'"?'))return;
  if(!confirm('CONFIRMAÇÃO FINAL: excluir este anúncio permanentemente?'))return;
  try{
-  // Mantido exatamente no formato do admin que já está funcionando:
-  // DELETE /admin/loft com loft_id no corpo JSON.
-  await api('/admin/loft',{method:'DELETE',body:JSON.stringify({loft_id:id})});
-  show('🗑 Anúncio excluído definitivamente.','ok');
-  await loadData();
+   await api('/admin/loft',{method:'DELETE',body:JSON.stringify({loft_id:id})});
+   show('🗑 Anúncio excluído definitivamente.','ok');
+   await loadData();
  }catch(e){show('❌ '+e.message,'err')}
 }
 let periodLoftId='';
@@ -630,10 +913,135 @@ async function editDailyPrice(k){
  }catch(e){show('❌ '+e.message,'err','calendarNotice')}
 }
 
+
+function switchTab(tab){
+  document.querySelectorAll('.lp-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.lp-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
+  if(tab==='dashboard') renderDashboard();
+  if(tab==='reports') loadReport();
+}
+function dateOnly(v){return v?String(v).slice(0,10):''}
+function fmtDate(v){const s=dateOnly(v);return s?s.split('-').reverse().join('/'):''}
+function loftNameForReservation(r){
+  return (r.lofts&&r.lofts.name) || r.loft_name || (data.lofts||[]).find(l=>l.id===r.loft_id)?.name || r.loft_id || 'Apartamento';
+}
+function reservationOverlapsFilter(r,from,to){
+  const ci=dateOnly(r.check_in),co=dateOnly(r.check_out);
+  if(!ci||!co)return false;
+  if(from && co<=from)return false;
+  if(to && ci>=to)return false;
+  return true;
+}
+function filteredReportReservations(){
+  const from=document.getElementById('reportFrom')?.value||'';
+  const to=document.getElementById('reportTo')?.value||'';
+  const loft=document.getElementById('reportLoft')?.value||'';
+  const status=document.getElementById('reportStatus')?.value||'';
+  return (reservations||[]).filter(r=>{
+    if(status && (r.status||'pending')!==status)return false;
+    if(loft && String(r.loft_id)!==String(loft))return false;
+    return reservationOverlapsFilter(r,from,to);
+  });
+}
+function loadReport(){
+  const sel=document.getElementById('reportLoft');
+  if(!sel)return;
+  const current=sel.value;
+  const names=(data.lofts||[]).map(l=>({id:l.id,name:l.name||'Sem nome'}));
+  sel.innerHTML='<option value="">Todos</option>'+names.map(l=>`<option value="${esc(l.id)}">${esc(l.name)}</option>`).join('');
+  sel.value=current;
+  if(!reservations.length){
+    api('/admin/reservations').then(j=>{reservations=j.reservations||[];renderReport();}).catch(e=>show('❌ '+e.message,'err'));
+  }else renderReport();
+}
+function renderDashboard(){
+  const el=document.getElementById('dashboardKpis'); if(!el)return;
+  const all=reservations||[];
+  const confirmed=all.filter(r=>r.status==='confirmed');
+  const pending=all.filter(r=>r.status==='pending');
+  const revenue=confirmed.reduce((s,r)=>s+Number(r.total_amount||0),0);
+  const commission=confirmed.reduce((s,r)=>s+reservationBreakdown(r).commission,0);
+  el.innerHTML=[
+    ['Apartamentos',data.lofts?.length||0,'cadastrados'],
+    ['Reservas confirmadas',confirmed.length,'com datas bloqueadas'],
+    ['Pendentes',pending.length,'aguardando pagamento/confirmação'],
+    ['Faturamento confirmado',moneyBR(revenue),`Comissão estimada: ${moneyBR(commission)}`]
+  ].map(x=>`<div class="lp-kpi"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+}
+function renderReport(){
+  const rs=filteredReportReservations();
+  const confirmed=rs.filter(r=>r.status==='confirmed');
+  const revenue=confirmed.reduce((s,r)=>s+Number(r.total_amount||0),0);
+  const cleaning=confirmed.reduce((s,r)=>s+reservationBreakdown(r).cleaning,0);
+  const commission=confirmed.reduce((s,r)=>s+reservationBreakdown(r).commission,0);
+  const nights=confirmed.reduce((s,r)=>s+reservationBreakdown(r).nights,0);
+  document.getElementById('reportKpis').innerHTML=[
+    ['Reservas',confirmed.length,'confirmadas no filtro'],
+    ['Noites',nights,'total de diárias'],
+    ['Faturamento',moneyBR(revenue),'reservas confirmadas'],
+    ['Lofts Prime',moneyBR(commission+cleaning),`comissão + faxina`]
+  ].map(x=>`<div class="lp-kpi"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+
+  const byLoft={};
+  confirmed.forEach(r=>{
+    const name=loftNameForReservation(r),b=reservationBreakdown(r);
+    if(!byLoft[name])byLoft[name]={reservas:0,noites:0,total:0,comissao:0,faxina:0};
+    byLoft[name].reservas++;byLoft[name].noites+=b.nights;byLoft[name].total+=b.total;byLoft[name].comissao+=b.commission;byLoft[name].faxina+=b.cleaning;
+  });
+  document.getElementById('reportByLoft').innerHTML=Object.keys(byLoft).length
+    ? '<div class="lp-mini-list">'+Object.entries(byLoft).sort((a,b)=>b[1].total-a[1].total).map(([name,x])=>`<div class="lp-mini-row"><span><b>${esc(name)}</b><br><small>${x.reservas} reserva(s) · ${x.noites} noite(s)</small></span><b>${moneyBR(x.total)}</b></div>`).join('')+'</div>'
+    : '<div class="lp-empty">Nenhuma reserva no filtro.</div>';
+
+  const byMonth={};
+  confirmed.forEach(r=>{
+    const key=dateOnly(r.check_in).slice(0,7)||'Sem data',b=reservationBreakdown(r);
+    if(!byMonth[key])byMonth[key]={reservas:0,noites:0,total:0};
+    byMonth[key].reservas++;byMonth[key].noites+=b.nights;byMonth[key].total+=b.total;
+  });
+  document.getElementById('reportByMonth').innerHTML=Object.keys(byMonth).length
+    ? '<div class="lp-mini-list">'+Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).map(([m,x])=>`<div class="lp-mini-row"><span><b>${m}</b><br><small>${x.reservas} reserva(s) · ${x.noites} noite(s)</small></span><b>${moneyBR(x.total)}</b></div>`).join('')+'</div>'
+    : '<div class="lp-empty">Nenhuma reserva no filtro.</div>';
+
+  document.getElementById('reportTable').innerHTML=rs.length
+    ? `<table class="lp-table"><thead><tr><th>Período</th><th>Apartamento</th><th>Status</th><th>Hóspede</th><th>Noites</th><th>Total</th><th>Comissão</th><th>Lofts Prime</th></tr></thead><tbody>${rs.sort((a,b)=>dateOnly(a.check_in).localeCompare(dateOnly(b.check_in))).map(r=>{const b=reservationBreakdown(r);const st=r.status||'pending';return `<tr><td>${fmtDate(r.check_in)} → ${fmtDate(r.check_out)}</td><td>${esc(loftNameForReservation(r))}</td><td><span class="lp-status ${esc(st)}">${esc({confirmed:'Confirmada',pending:'Pendente',rejected:'Recusada',cancelled:'Cancelada'}[st]||st)}</span></td><td>${esc((r.guests||{}).name||'')}</td><td>${b.nights}</td><td>${moneyBR(b.total)}</td><td>${moneyBR(b.commission)}</td><td>${moneyBR(b.primeAmount)}</td></tr>`}).join('')}</tbody></table>`
+    : '<div class="lp-empty">Nenhuma reserva encontrada para os filtros selecionados.</div>';
+}
+function clearReportFilters(){
+  document.getElementById('reportFrom').value='';
+  document.getElementById('reportTo').value='';
+  document.getElementById('reportLoft').value='';
+  document.getElementById('reportStatus').value='confirmed';
+  renderReport();
+}
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function exportReportPDF(){
+  const reportPane=document.getElementById('tab-reports');
+  if(!reportPane)return;
+  if(!reportPane.classList.contains('active')){
+    switchTab('reports');
+    loadReport();
+  }else{
+    renderReport();
+  }
+  setTimeout(()=>window.print(),250);
+}
+
+function exportReportCSV(){
+  const rs=filteredReportReservations();
+  if(!rs.length){show('Não há reservas para exportar.','err');return}
+  const rows=[['Check-in','Check-out','Apartamento','Status','Hóspede','Hóspedes','Noites','Total','Diárias','Faxina','Comissão 20%','Lofts Prime']];
+  rs.forEach(r=>{const b=reservationBreakdown(r);rows.push([dateOnly(r.check_in),dateOnly(r.check_out),loftNameForReservation(r),r.status||'',(r.guests||{}).name||'',r.guests_count||'',b.nights,b.total,b.dailyTotal,b.cleaning,b.commission,b.primeAmount])});
+  const csv='\uFEFF'+rows.map(row=>row.map(csvCell).join(';')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='relatorio-lofts-prime.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
 async function showReservations(){
  try{
   const j=await api('/admin/reservations');
   reservations=j.reservations||[];
+  renderDashboard();
+  if(document.getElementById('tab-reports')?.classList.contains('active')) renderReport();
   const panel=document.getElementById('reservationsPanel');
   if(!reservations.length){
     panel.innerHTML='<div class="card"><h2>Solicitações de reserva</h2><div class="empty">Nenhuma solicitação encontrada.</div></div>';
@@ -721,5 +1129,9 @@ function openGuestWhatsApp(phone,id,loft){
 
 function logout(){token='';localStorage.removeItem('lofts_prime_admin_token');showLogin();document.getElementById('status').textContent='Aguardando login';}
 loadData();
+</script>
+<script>
+/* Camada final de segurança visual: modais sempre acima do menu sticky. */
+document.querySelectorAll('.modal').forEach(m=>m.style.zIndex='1000');
 </script>
 </body></html>
